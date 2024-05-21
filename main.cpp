@@ -1,4 +1,4 @@
-﻿#include<Windows.h>
+#include<Windows.h>
 #include<cstdint>
 #include<string>
 #include<format>
@@ -520,22 +520,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-	//コマンドを積む 02_00 p48
-	commandList->RSSetViewports(1, &viewport);//Viewportを設定
-	commandList->RSSetScissorRects(1, &scissorRect);
-	// Scirssorを設定
-	//RootSignatureを設定。PSに設定しているけど別途設定が必要
-	commandList->SetGraphicsRootSignature(rootSignature);
-	commandList->SetPipelineState(graphicsPipelineState);
-	// PSOを設定
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-	//形状を設定。PSに設定しているものとはまた別。同じものを設定すると考えておけば良い
-	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//描画!(Drawcall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
-	commandList->DrawInstanced(3, 1, 0, 0);
 
-
-	//ウィンドウの×ボタンが押されるまでループ
+	//ウィンドウの×ボタンが押されるまでメインループ
 	while (msg.message != WM_QUIT) {
 		//WINDOWにメッセージが来てたら最優先で処理させる
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -568,6 +554,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//指定した色で画面全体を」クリアする
 			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; //青っぽい色。RGBAの順
 			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+
+			//コマンドを積む 02_00 p48
+			commandList->RSSetViewports(1, &viewport);//Viewportを設定
+			commandList->RSSetScissorRects(1, &scissorRect);
+			// Scirssorを設定
+			//RootSignatureを設定。PSに設定しているけど別途設定が必要
+			commandList->SetGraphicsRootSignature(rootSignature);
+			commandList->SetPipelineState(graphicsPipelineState);
+			//追加 RootSignature作成 02_01 p9]
+			//D3D12_ROOT_SIGNATURE_DESC descript
+			// PSOを設定
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+			//形状を設定。PSに設定しているものとはまた別。同じものを設定すると考えておけば良い
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//描画!(Drawcall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
+			commandList->DrawInstanced(3, 1, 0, 0);
 
 			//画面に描く処理はすべて終わり、画面に映すので、状態を遷移 01_02 p8
 			// 今回はRenderTargetからPresentにする
