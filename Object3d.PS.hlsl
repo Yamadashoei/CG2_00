@@ -2,7 +2,7 @@
 //02_01 p6
 struct Material
 {
-    float32_t color;
+    float32_t4 color;
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
