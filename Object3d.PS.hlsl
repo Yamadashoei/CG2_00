@@ -4,8 +4,6 @@
 Texture2D<float32_t4> gTexture : register(t0);
 SamplerState gSampler : register(s0);
 
-////03_00 p43 p49
-float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
 
 //output.color=gMaterial.color*textureColor;
 
@@ -27,5 +25,7 @@ PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
     output.color = gMaterial.color;
+    ////03_00 p43 p49
+    float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
     return output;
 }
