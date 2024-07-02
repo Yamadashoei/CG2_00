@@ -26,9 +26,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 	HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 );
 
-//03_01 p21 765から 
-//bool DepthFunc(float currZ, float prevZ) {
-	//return currZ <= prevZ;}
 
 struct Vector4 {
 	float x, y, z, w;
@@ -676,12 +673,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//どのように画面に色を打ち込むかの設定(気にしなくて良い)
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-	//実際に生成
-	ID3D12PipelineState* graphicsPipelineState = nullptr;
-	hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
-		IID_PPV_ARGS(&graphicsPipelineState));
-	assert(SUCCEEDED(hr));
-
 
 	//03_01 p14 DepthStencilTexture関数を使う
 	ID3D12Resource* depthStenceilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
@@ -708,6 +699,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//DepthStencilをPSOに代入 03_01 p20
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+	//実際に生成
+	ID3D12PipelineState* graphicsPipelineState = nullptr;
+	hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
+		IID_PPV_ARGS(&graphicsPipelineState));
+	assert(SUCCEEDED(hr));
+
 
 
 	//頂点リソース用のヒープの設定 02_00 p42
@@ -743,6 +741,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//1頂点あたりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
+	////Sprite用の頂点リソースを作る 04_00 p9
+	//ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+
+	////VertexBufferViewを作成 04_00 p9
+	//D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+	////リソースの先頭アドレスから使う
+	//vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
+	////リソースサイズは頂点３つ分
+	//vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	////1頂点あたりのサイズ
+	//vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+
 	//マテリアル用のリソースを作る 02_01 p13
 	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
 	//マテリアルにデータを書き込む
@@ -777,6 +787,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//右下2
 	vertexData[5].position = { 0.5f, -0.5f, -0.5f, 1.0f };
 	vertexData[5].texcoord = { 1.0f, 1.0f };
+
+
+	////頂点リソースにデータを書き込む //04_00 p10
+	//VertexData* vertexDataSprite = nullptr;
+	////書き込むためのアドレスを取得
+	//vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+	////左下
+	//vertexDataSprite[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
+	//vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
+	//// 上
+	//vertexDataSprite[1].position = { 0.0f, 0.0f, 0.0f,1.0f };
+	//vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
+	////右下
+	//vertexDataSprite[2].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	//vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
+
+	////左下2
+	//vertexDataSprite[3].position = { 0.0f, 0.0f, 0.0f, 1.0f };
+	//vertexDataSprite[3].texcoord = { 0.0f, 0.0f };
+	//// 上2
+	//vertexDataSprite[4].position = { 640.0f, 0.0f, 0.0f, 1.0f };
+	//vertexDataSprite[4].texcoord = { 1.0f, 0.0f };
+	////右下2
+	//vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	//vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
 
 
 	//ViewportとScissor 02_00 p46
@@ -823,6 +858,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//02_02 p15
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
+
+	////マテリアル用のリソースを作る 04_00 p11
+	//ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	////データを書き込む
+	//Matrix4x4* transformationMatrixDataSprite = nullptr;
+	////書き込むためのアドレスを取得
+	//transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	////赤を書き込む
+	//*transformationMatrixDataSprite = MakeIdentity4x4();
+
+	//CPUで動かす用のtransformを作る 04_00 p11
+	//Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
 
 	//Textureを読んで転送する 03_00 p20
 	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
@@ -897,18 +946,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//遷移後ResourceState
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-			//03_01 p24
+			//DSVを設定 03_01 p24
 			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
-			//
+			
+			//指定した深度で画面全体をクリアする 03_01 p24
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 			//TransitionBarrierを張る
 			commandList->ResourceBarrier(1, &barrier);
 
-
-			//描画先のRTVを設定する
-			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
 			//指定した色で画面全体をクリアする
 			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; //青っぽい色。RGBAの順
 			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
