@@ -12,18 +12,11 @@ Matrix4x4 MakeRotateZMatrix(float radian);
 Matrix4x4 MakeAffineMatrix(const Vector3& scale,
 	const Vector3& rotate, const Vector3& translation);
 
+Matrix4x4 MakePerspectiveForMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
+Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
 
-Matrix4x4 MakeIdentity4x4() {
-	Matrix4x4 ans = { 0 };
-	for (int a = 0; a < 4; a++) {
-		for (int b = 0; b < 4; b++) {
-			if (a == b) {
-				ans.m[a][b] = 1;
-			}
-		}
-	}
-	return ans;
-}
+
+Matrix4x4 MakeIdentity4x4();
 
 
 struct Transform { //02_02 p14

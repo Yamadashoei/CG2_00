@@ -741,17 +741,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//1頂点あたりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
-	////Sprite用の頂点リソースを作る 04_00 p9
-	//ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+	//Sprite用の頂点リソースを作る 04_00 p9
+	ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
 
-	////VertexBufferViewを作成 04_00 p9
-	//D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
-	////リソースの先頭アドレスから使う
-	//vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
-	////リソースサイズは頂点３つ分
-	//vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
-	////1頂点あたりのサイズ
-	//vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+	//VertexBufferViewを作成 04_00 p9
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+	//リソースの先頭アドレスから使う
+	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
+	//リソースサイズは頂点３つ分
+	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	//1頂点あたりのサイズ
+	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
 
 	//マテリアル用のリソースを作る 02_01 p13
 	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
@@ -761,7 +761,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	//赤を書き込む
 	*materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-
 
 	//頂点リソースにデータを書き込む //03_00 p30
 	VertexData* vertexData = nullptr;
@@ -789,29 +788,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexData[5].texcoord = { 1.0f, 1.0f };
 
 
-	////頂点リソースにデータを書き込む //04_00 p10
-	//VertexData* vertexDataSprite = nullptr;
-	////書き込むためのアドレスを取得
-	//vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-	////左下
-	//vertexDataSprite[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
-	//vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
-	//// 上
-	//vertexDataSprite[1].position = { 0.0f, 0.0f, 0.0f,1.0f };
-	//vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
-	////右下
-	//vertexDataSprite[2].position = { 640.0f, 360.0f, 0.0f, 1.0f };
-	//vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
+	//頂点リソースにデータを書き込む //04_00 p10
+	VertexData* vertexDataSprite = nullptr;
+	//書き込むためのアドレスを取得
+	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+	//左下
+	vertexDataSprite[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
+	vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
+	// 上
+	vertexDataSprite[1].position = { 0.0f, 0.0f, 0.0f,1.0f };
+	vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
+	//右下
+	vertexDataSprite[2].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
 
-	////左下2
-	//vertexDataSprite[3].position = { 0.0f, 0.0f, 0.0f, 1.0f };
-	//vertexDataSprite[3].texcoord = { 0.0f, 0.0f };
-	//// 上2
-	//vertexDataSprite[4].position = { 640.0f, 0.0f, 0.0f, 1.0f };
-	//vertexDataSprite[4].texcoord = { 1.0f, 0.0f };
-	////右下2
-	//vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f };
-	//vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
+	//左下2
+	vertexDataSprite[3].position = { 0.0f, 0.0f, 0.0f, 1.0f };
+	vertexDataSprite[3].texcoord = { 0.0f, 0.0f };
+	// 上2
+	vertexDataSprite[4].position = { 640.0f, 0.0f, 0.0f, 1.0f };
+	vertexDataSprite[4].texcoord = { 1.0f, 0.0f };
+	//右下2
+	vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
 
 
 	//ViewportとScissor 02_00 p46
@@ -860,17 +859,36 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
-	////マテリアル用のリソースを作る 04_00 p11
-	//ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
-	////データを書き込む
-	//Matrix4x4* transformationMatrixDataSprite = nullptr;
-	////書き込むためのアドレスを取得
-	//transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
-	////赤を書き込む
-	//*transformationMatrixDataSprite = MakeIdentity4x4();
+	//マテリアル用のリソースを作る 04_00 p11
+	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	//データを書き込む
+	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	//書き込むためのアドレスを取得
+	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	//赤を書き込む
+	*transformationMatrixDataSprite = MakeIdentity4x4();
 
 	//CPUで動かす用のtransformを作る 04_00 p11
-	//Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
+
+	////実際に頂点リソースを作る 06_00 p6
+	//ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
+
+	//D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
+	////リソースの先頭のアドレスから使う
+	//indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
+	////使用するリソースのサイズはインデックス６つ分のサイズ
+	//indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
+	////インデックスをuint32_tとする
+	//indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
+
+	////インデックスリソースにデータを書き込む 06_00 p7
+	//uint32_t* indexDataSprite = nullptr;
+	//indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
+	//indexDataSprite[0] = 0;  indexDataSprite[1] = 1;  indexDataSprite[2] = 2;
+	//indexDataSprite[3] = 1;  indexDataSprite[4] = 3;  indexDataSprite[5] = 2;
+
 
 
 	//Textureを読んで転送する 03_00 p20
@@ -932,6 +950,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			*wvpData = worldMatrix;
 
+			//WVPMatrix 04_00 p12
+			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
+			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
+			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 
 			//TransitionBarrierの設定 01_02 p6
 			D3D12_RESOURCE_BARRIER barrier{};
@@ -949,7 +973,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//DSVを設定 03_01 p24
 			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
-			
+
 			//指定した深度で画面全体をクリアする 03_01 p24
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
@@ -974,7 +998,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetPipelineState(graphicsPipelineState);// PSOを設定
 			//VBVを設定
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+			//IndexBufferView 06_00 p8
+			//commandList->IASetVertexBuffer(&vertexBufferViewSprite);
+			//06_00 p8
+			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
+
 			//形状を設定。PSに設定しているものとはまた別。同じものを設定すると考えておけば良い
+
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			//マテリアルCBufferの場所を設定 02_01 p15
@@ -985,6 +1017,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//03_00 p50
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
+			//spriteの描画。変更が必要なものだけ変更する
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+			//TransformationMatrixBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			//描画！
+			commandList->DrawInstanced(6, 1, 0, 0);
 
 
 			//ImGuiの内部コマンド生成 02_03 p15
