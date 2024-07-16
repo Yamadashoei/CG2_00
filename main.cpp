@@ -20,7 +20,7 @@
 #include "Transform.h"
 #include "externals/DirectXTex/DirectXTex.h"
 
-
+//06_00 p6
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 	HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
@@ -872,22 +872,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
-	////実際に頂点リソースを作る 06_00 p6
-	//ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
+	//実際に頂点リソースを作る 06_00 p6
+	ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
 
-	//D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
-	////リソースの先頭のアドレスから使う
-	//indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
-	////使用するリソースのサイズはインデックス６つ分のサイズ
-	//indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
-	////インデックスをuint32_tとする
-	//indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
+	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
+	//リソースの先頭のアドレスから使う
+	indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
+	//使用するリソースのサイズはインデックス６つ分のサイズ
+	indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
+	//インデックスをuint32_tとする
+	indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
 
-	////インデックスリソースにデータを書き込む 06_00 p7
-	//uint32_t* indexDataSprite = nullptr;
-	//indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
-	//indexDataSprite[0] = 0;  indexDataSprite[1] = 1;  indexDataSprite[2] = 2;
-	//indexDataSprite[3] = 1;  indexDataSprite[4] = 3;  indexDataSprite[5] = 2;
+	//インデックスリソースにデータを書き込む 06_00 p7
+	uint32_t* indexDataSprite = nullptr;
+	indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
+	indexDataSprite[0] = 0;  indexDataSprite[1] = 1;  indexDataSprite[2] = 2;
+	indexDataSprite[3] = 1;  indexDataSprite[4] = 3;  indexDataSprite[5] = 2;
 
 
 
@@ -987,7 +987,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//描画用のDescriptorHeapの設定
 			ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
 			commandList->SetDescriptorHeaps(1, descriptorHeaps);
-
+			
 
 			//コマンドを積む 02_00 p48
 			commandList->RSSetViewports(1, &viewport);//Viewportを設定
@@ -999,12 +999,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//VBVを設定
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-			//IndexBufferView 06_00 p8
-			//commandList->IASetVertexBuffer(&vertexBufferViewSprite);
-			//06_00 p8
-			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
-
+			
 			//形状を設定。PSに設定しているものとはまた別。同じものを設定すると考えておけば良い
 
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1018,6 +1013,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//03_00 p50
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
+			//描画!(Drawcall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
+			//commandList->DrawInstanced(6, 1, 0, 0);
+			//06_00 p8
+			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
+			//IndexBufferView 06_00 p8
+			commandList->IASetIndexBuffer(&indexBufferViewSprite);
+
+
 			//spriteの描画。変更が必要なものだけ変更する
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 			//TransformationMatrixBufferの場所を設定
@@ -1029,8 +1033,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGuiの内部コマンド生成 02_03 p15
 			ImGui::Render();
 
-			//描画!(Drawcall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
-			commandList->DrawInstanced(6, 1, 0, 0);
 			//02_03 p16
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
