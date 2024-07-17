@@ -795,22 +795,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//左下
 	vertexDataSprite[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
 	vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
-	// 上
+	//左上
 	vertexDataSprite[1].position = { 0.0f, 0.0f, 0.0f,1.0f };
 	vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
 	//右下
 	vertexDataSprite[2].position = { 640.0f, 360.0f, 0.0f, 1.0f };
 	vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
-
-	//左下2
-	vertexDataSprite[3].position = { 0.0f, 0.0f, 0.0f, 1.0f };
-	vertexDataSprite[3].texcoord = { 0.0f, 0.0f };
-	// 上2
-	vertexDataSprite[4].position = { 640.0f, 0.0f, 0.0f, 1.0f };
-	vertexDataSprite[4].texcoord = { 1.0f, 0.0f };
-	//右下2
-	vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f };
-	vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
+	//右上
+	vertexDataSprite[3].position = { 640.0f, 0.0f, 0.0f, 1.0f };
+	vertexDataSprite[3].texcoord = { 1.0f, 0.0f };
 
 
 	//ViewportとScissor 02_00 p46
@@ -987,7 +980,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//描画用のDescriptorHeapの設定
 			ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
 			commandList->SetDescriptorHeaps(1, descriptorHeaps);
-			
+
 
 			//コマンドを積む 02_00 p48
 			commandList->RSSetViewports(1, &viewport);//Viewportを設定
@@ -999,7 +992,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//VBVを設定
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-			
+
 			//形状を設定。PSに設定しているものとはまた別。同じものを設定すると考えておけば良い
 
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1013,21 +1006,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//03_00 p50
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			//描画!(Drawcall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
-			//commandList->DrawInstanced(6, 1, 0, 0);
-			//06_00 p8
-			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			//描画！
+			commandList->DrawInstanced(6, 1, 0, 0);
 
 			//IndexBufferView 06_00 p8
 			commandList->IASetIndexBuffer(&indexBufferViewSprite);
-
 
 			//spriteの描画。変更が必要なものだけ変更する
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 			//TransformationMatrixBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			//描画！
-			commandList->DrawInstanced(6, 1, 0, 0);
+
+			//描画!(Drawcall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
+			//commandList->DrawInstanced(6, 1, 0, 0);
+
+			//06_00 p8
+			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
 
 
 			//ImGuiの内部コマンド生成 02_03 p15
