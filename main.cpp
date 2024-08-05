@@ -296,8 +296,7 @@ ID3D12Resource* CreateTextureResource(ID3D12Device*
 	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;//
 	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;//
 
-	//Resourceを生成してreturnする
-//Resourceの生成
+	//Resourceを生成して,returnする
 	ID3D12Resource* resource = nullptr;
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProperties, //
@@ -343,7 +342,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 		s >> identifier;
 
 		//identifer
-		if (identifier == "map_KD") {
+		if (identifier == "map_Kd") {
 			std::string textureFilename;
 			s >> textureFilename;
 			//連結してファイルパスにする
@@ -394,7 +393,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
 				std::string vertexDefinition;
 				s >> vertexDefinition;
-				//頂点の要素へのIndexlは「位置 / UV / 法線」で格納されているので、分解してIndexを取得する
+				//頂点の要素へのIndexは「位置 / UV / 法線」で格納されているので、分解してIndexを取得する
 				std::istringstream v(vertexDefinition);
 				uint32_t elementIndices[3];
 				for (int32_t element = 0; element < 3; ++element) {
@@ -406,14 +405,13 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
-				//VertexData vertex = { position, texcoord, normal };
-				//modelData.vertices.push_back(vertex);
-				triangle[faceVertex] = { position,texcoord,normal };
 
 				//06_02_p23
-				position.x *= -1.0f;
+				position.x *= 1.0f;
 				normal.x *= -1.0f;
 				texcoord.y = 1.0f - texcoord.y;
+
+				triangle[faceVertex] = { position,texcoord,normal };
 			}
 			//頂点を逆順で登録することで、回り順を逆にする 06_02_p23
 			modelData.vertices.push_back(triangle[2]);
@@ -493,14 +491,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	MSG msg{};
 
-	//p4
-	//DXGIファクトリーの生成
+	//DXGIファクトリーの生成 p4
 	IDXGIFactory7* dxgiFactory = nullptr;
 	//HRESULTはWindow系のエラーコード
 	//関数が成功したかどうかをSUCCEEDEDマクロで判断できる
 	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
-	//初期化の根本的な部分でエラーが出た場合はプログラムが間違っているかどうか、
-	//どうにもできない場合が多いためassertにしておく
+	//初期化の根本的な部分でエラーが出た場合はプログラムが間違っているかどうか、どうにもできない場合が多いため,assertにしておく
 	assert(SUCCEEDED(hr));
 
 
@@ -546,7 +542,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 
-
 	//コマンドキューを生成する p6ここから
 	ID3D12CommandQueue* commandQueue = nullptr;
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
@@ -554,7 +549,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		IID_PPV_ARGS(&commandQueue));
 	//コマンドキューの生成が上手くいかなかったので起動できない
 	assert(SUCCEEDED(hr));
-
 
 	//コマンドアロケーターを生成する
 	ID3D12CommandAllocator* commandAllocator = nullptr;
@@ -593,8 +587,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeap(
 		device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
-
-
 	//SwapChainからResourceを引っ張てくる p19
 	ID3D12Resource* swapChainResources[2] = { nullptr };
 	hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
@@ -602,7 +594,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResources[1]));
 	assert(SUCCEEDED(hr));
-
 
 	//RTVの設定 p20
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
@@ -619,7 +610,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rtvHandles[1].ptr = rtvHandles[0].ptr + device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	//2つ目を作る
 	device->CreateRenderTargetView(swapChainResources[1], &rtvDesc, rtvHandles[1]);
-
 
 
 	//デバイスの生成がうまくいかなかったので起動できない
@@ -847,6 +837,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//06_02 p17
 	//モデル読み込み
 	ModelData modelData = LoadObjFile("resources", "plane.obj");
+
+
 	//実際に頂点リソースを作る 02_01 p12
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 
@@ -883,34 +875,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	//赤を書き込む
-	*materialData = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	//頂点リソースにデータを書き込む //03_00 p30
 	VertexData* vertexData = nullptr;
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
-	//頂点resource 6-2
-	////左下
-	//vertexData[0].position = { -0.5f, -0.5f, 0.0f, 1.0f };
-	//vertexData[0].texcoord = { 0.0f, 1.0f };
-	//// 上
-	//vertexData[1].position = { 0.0f, 0.5f, 0.0f, 1.0f };
-	//vertexData[1].texcoord = { 0.5f, 0.0f };
-	////右下
-	//vertexData[2].position = { 0.5f, -0.5f, 0.0f, 1.0f };
-	//vertexData[2].texcoord = { 1.0f, 1.0f };
-
-	////左下2
-	//vertexData[3].position = { -0.5f, -0.5f, 0.5f, 1.0f };
-	//vertexData[3].texcoord = { 0.0f, 1.0f };
-	//// 上2
-	//vertexData[4].position = { 0.0f, 0.0f, 0.0f, 1.0f };
-	//vertexData[4].texcoord = { 0.5f, 0.0f };
-	////右下2
-	//vertexData[5].position = { 0.5f, -0.5f, -0.5f, 1.0f };
-	//vertexData[5].texcoord = { 1.0f, 1.0f };
-
 
 	//頂点リソースにデータを書き込む //04_00 p10
 	VertexData* vertexDataSprite = nullptr;
@@ -973,7 +944,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	*wvpData = MakeIdentity4x4();
 
 	//02_02 p15
-	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transform{ {0.5f,0.5f,0.5f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
 	//マテリアル用のリソースを作る 04_00 p11
@@ -1051,7 +1022,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//開発用のUIの処理
 			//ImGui::ShowDemoWindow();
 			//ImGui色変え
-			ImGui::Begin("Window");
+			ImGui::Begin("Model");
 			ImGui::DragFloat3("color", &materialData->x, 0.01f);
 
 			ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
@@ -1061,6 +1032,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ColorEdit3("color", &materialData->x);
 			ImGui::End();
 
+			ImGui::Begin("Window");
+			ImGui::DragFloat3("spriteColor", &materialData->x, 0.01f);
+
+			ImGui::DragFloat3("spriteScale", &transformSprite.scale.x, 0.01f);
+			ImGui::DragFloat3("spriteRotate", &transformSprite.rotate.x, 0.01f);
+			ImGui::DragFloat3("spriteTranslate", &transformSprite.translate.x, 0.01f);
+			//色変え
+			ImGui::ColorEdit3("spriteColor", &materialData->x);
+			ImGui::End();
 
 			//これから書き込むバックバッファのインデックスを取得　p26
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -1085,7 +1065,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			//バリアを張る対象のリソース。現在のバックバッファに対して行う
 			barrier.Transition.pResource = swapChainResources[backBufferIndex];
-			//遷移前(現在)Rsrceate
+			//遷移前(現在)
 			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 			//遷移後ResourceState
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -1212,9 +1192,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootSignature->Release();
 	pixelShaderBlob->Release();
 	vertexShaderBlob->Release();
-
 	materialResource->Release();
-
 	CloseHandle(fenceEvent);
 	fence->Release();
 	rtvDescriptorHeap->Release();
@@ -1250,7 +1228,5 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-
 	return 0;
-
 }
