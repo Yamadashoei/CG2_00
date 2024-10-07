@@ -38,7 +38,6 @@ struct Vector2 {
 	float x, y;
 };
 
-//03_00 p29
 struct VertexData
 {
 	Vector4 position;
