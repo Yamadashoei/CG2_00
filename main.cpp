@@ -25,6 +25,8 @@
 
 #include <cassert>
 
+#include "Input.h"
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 	HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 );
@@ -646,6 +648,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 #endif
 
+	//ポインタ
+	Input* input = nullptr;
+	//入力の初期化
+	input = new Input();
+	input->Initialize(wc.hInstance, hwnd);
+
+
+
+
 	//初期値でFenceを作る 01_02 p15
 	ID3D12Fence* fence = nullptr;
 	uint64_t fenceValue = 0;
@@ -1010,6 +1021,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			DispatchMessage(&msg);
 		}
 		else {
+
+			//キーボード情報を取得
+			//keyboard->Acquire();
+			//全キーの入力状態を取得する
+			//BYTE key[256] = {};
+			//keyboard->GetDeviceState(sizeof(key), key);
+			
+			//数字の0キーが押されたら
+			if (input->TriggerKey(DIK_0)) {
+				OutputDebugStringA("Hit 0\n");
+				transform.rotate.x++;
+			}
+
+			//入力更新
+			input->Update();
+
+
 			//ゲームの処理↓
 			//ImGuiを使う 02_03 p15
 			ImGui_ImplDX12_NewFrame();
@@ -1201,6 +1229,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	device->Release();
 	useAdapter->Release();
 	dxgiFactory->Release();
+	//入力解放
+	delete input;
 
 #ifdef _DEBUG
 	debugController->Release();
