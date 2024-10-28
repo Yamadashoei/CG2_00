@@ -41,7 +41,7 @@ bool Input::TriggerKey(BYTE keyNumber)
 
 void Input::Update()
 {
-	//前回のキー入力を保存
+	//前回のキー入力を保存 
 	memcpy(keyPre, key, sizeof(key));
 	//キーボード情報の取得開始
 	keyboard->Acquire();
