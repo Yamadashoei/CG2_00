@@ -1152,7 +1152,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//GPUにコマンドリストの実行を行わせる p27
 			ID3D12CommandList* commandLists[] = { commandList };
 			commandQueue->ExecuteCommandLists(1, commandLists);
-			//GPUとOSに画面の交換を行うように通知する
+			//GPUとOSに画面の交換を行うように通知する　　　
 			swapChain->Present(1, 0);
 
 			//Fenceの値を更新
