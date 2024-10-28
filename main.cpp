@@ -1162,7 +1162,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandQueue->Signal(fence, fenceValue);
 
 			//Fenceの値が指定したSignal値にたどり着いているか確認する
-			//GetCompletedValueの初期化はFence作成時に渡した初期値
+			//GetCompletedValueの初期化はFence作成時に渡した初期値 
 			if (fence->GetCompletedValue() < fenceValue) {
 				//指定したSignalにたどり着いていないので、
 				// たどり着くまで待つようにイベントを設定する
