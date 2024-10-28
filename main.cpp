@@ -908,7 +908,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			vertexData[start + 2].texcoord.x = float(lonIndex + 1) / float(kSubdivision);
 			vertexData[start + 2].texcoord.y = 1.0f - float(latIndex) / float(kSubdivision);
 
-			//c
+			//c　
 			vertexData[start + 3] = vertexData[start + 2];
 			//b
 			vertexData[start + 4] = vertexData[start + 1];
