@@ -2,30 +2,28 @@
 #include<cstdint>
 #include<string>
 #include<format>
+
+#include<cassert>
+#include<fstream>
+#include<sstream>
+#include<dxgidebug.h>
+#include<dxcapi.h>
 #include<d3d12.h>
 #include<dxgi1_6.h>
-#include<cassert>
+#include "Transform.h"
+
+#pragma comment(lib,"dxcompiler.lib")
+#pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
-#include<dxgidebug.h>
-#pragma comment(lib,"dxguid.lib")
-
-#include<dxcapi.h>
-#pragma comment(lib,"dxcompiler.lib")
 
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
-
-#include "Transform.h"
 #include "externals/DirectXTex/DirectXTex.h"
 
-#include<fstream>
-#include<sstream>
-
-#include <cassert>
-
 #include "Input.h"
+#include "WinApp.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 	HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
@@ -58,25 +56,25 @@ struct ModelData {
 };
 
 
-// -ウィンドウプロシーシャ
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
-	WPARAM wparam, LPARAM lparam) {
-
-	//Imguiのマウス操作
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
-		return true;
-	}
-	//メッセージに応じてゲーム固有の処理を行う
-	switch (msg) {
-		//ウィンドウが破棄された
-	case WM_DESTROY:
-		//OSに対して、アプリの終了を伝える
-		PostQuitMessage(0);
-		return 0;
-	}
-	//標準のメッセージ処理を行なう
-	return DefWindowProc(hwnd, msg, wparam, lparam);
-}
+//// -ウィンドウプロシーシャ
+//LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
+//	WPARAM wparam, LPARAM lparam) {
+//
+//	//Imguiのマウス操作
+//	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
+//		return true;
+//	}
+//	//メッセージに応じてゲーム固有の処理を行う
+//	switch (msg) {
+//		//ウィンドウが破棄された
+//	case WM_DESTROY:
+//		//OSに対して、アプリの終了を伝える
+//		PostQuitMessage(0);
+//		return 0;
+//	}
+//	//標準のメッセージ処理を行なう
+//	return DefWindowProc(hwnd, msg, wparam, lparam);
+//}
 
 std::wstring ConvertString(const std::string& str) {
 	if (str.empty()) {
@@ -427,48 +425,48 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
-	//COMの初期化 03_00 p12
-	CoInitializeEx(0, COINIT_MULTITHREADED);
+	//ポインタ
+	WinApp* winApp = nullptr;
+	//WindowsAPIの初期化
+	winApp = new WinApp();
+	winApp->Initialize();
 
-	WNDCLASS wc{};
-	//ウィンドウプロシーシャ
-	wc.lpfnWndProc = WindowProc;
-	//ウィンドウクラス名
-	wc.lpszClassName = L"CG2WindowClass";
-	//インスタンスハンドル
-	wc.hInstance = GetModuleHandle(nullptr);
-	//カーソル
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
-	//ウィンドウクラスを登録する
-	RegisterClass(&wc);
-
-	//クライアント領域のサイズ
-	const int32_t kClientWidth = 1200;
-	const int32_t kClientHeight = 720;
-
-	//ウィンドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0,0,kClientWidth,kClientHeight };
-
-	//クライアント領域をもとに実際のサイズにwrcを変更してもらう
-	AdjustWindowRect(&wrc, WS_EX_OVERLAPPEDWINDOW, false);
-
-	//ウィンドウの生成
-	HWND hwnd = CreateWindow(
-		wc.lpszClassName,     //利用するクラス名
-		L"CG2",               //タイトルバーの文字(何でもいい
-		WS_OVERLAPPEDWINDOW,  //よく見るウィンドウスタイル
-		CW_USEDEFAULT,        //表示x座標(Windowに任せる)
-		CW_USEDEFAULT,        //表示y座標(WindowOSに任せる)
-		wrc.right - wrc.left, //ウィンドウ横幅
-		wrc.bottom - wrc.top, //ウィンドウ縦幅
-		nullptr,              //親ウィンドウハンドル
-		nullptr,              //メニューハンドル
-		wc.hInstance,         //インスタンスハンドル
-		nullptr);             //オプション
-
-	//ウィンドウを表示する
-	ShowWindow(hwnd, SW_SHOW);
+	////COMの初期化 03_00 p12
+	//CoInitializeEx(0, COINIT_MULTITHREADED);
+	//WNDCLASS wc{};
+	////ウィンドウプロシーシャ
+	//wc.lpfnWndProc = WindowProc;
+	////ウィンドウクラス名
+	//wc.lpszClassName = L"CG2WindowClass";
+	////インスタンスハンドル
+	//wc.hInstance = GetModuleHandle(nullptr);
+	////カーソル
+	//wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	////ウィンドウクラスを登録する
+	//RegisterClass(&wc);
+	////クライアント領域のサイズ
+	//const int32_t kClientWidth = 1200;
+	//const int32_t kClientHeight = 720;
+	////ウィンドウサイズを表す構造体にクライアント領域を入れる
+	//RECT wrc = { 0,0,kClientWidth,kClientHeight };
+	////クライアント領域をもとに実際のサイズにwrcを変更してもらう
+	//AdjustWindowRect(&wrc, WS_EX_OVERLAPPEDWINDOW, false);
+	////ウィンドウの生成
+	//HWND hwnd = CreateWindow(
+	//	wc.lpszClassName,     //利用するクラス名
+	//	L"CG2",               //タイトルバーの文字(何でもいい
+	//	WS_OVERLAPPEDWINDOW,  //よく見るウィンドウスタイル
+	//	CW_USEDEFAULT,        //表示x座標(Windowに任せる)
+	//	CW_USEDEFAULT,        //表示y座標(WindowOSに任せる)
+	//	wrc.right - wrc.left, //ウィンドウ横幅
+	//	wrc.bottom - wrc.top, //ウィンドウ縦幅
+	//	nullptr,              //親ウィンドウハンドル
+	//	nullptr,              //メニューハンドル
+	//	wc.hInstance,         //インスタンスハンドル
+	//	nullptr);             //オプション
+	////ウィンドウを表示する
+	//ShowWindow(hwnd, SW_SHOW);
 
 #ifdef _DEBUG
 	ID3D12Debug1* debugController = nullptr;
@@ -1206,6 +1204,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxgiFactory->Release();
 	//入力解放
 	delete input;
+	//WindowsAPI解放
+	delete winApp;
 
 #ifdef _DEBUG
 	debugController->Release();
