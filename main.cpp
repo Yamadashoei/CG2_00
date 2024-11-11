@@ -1012,7 +1012,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//入力更新
 			input->Update();
 
-			//数字の0キーが押されたら
+			//数字の0キーが押されたら　
 			if (input->TriggerKey(DIK_0)) {
 				OutputDebugStringA("Hit 0\n");
 				transform.rotate.x++;
