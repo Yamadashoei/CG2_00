@@ -24,6 +24,11 @@ public: //メンバ変数
 	static const int32_t kClientWidth = 1280;
 	static const int32_t kClientHeight = 720;
 
+	//メッセージの処理
+	bool ProcessMessage();
+
+
+
 private:
 	//ウィンドウハンドル
 	HWND hwnd = nullptr;

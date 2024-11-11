@@ -531,7 +531,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 	}
-
+	
 
 	//コマンドキューを生成する p6ここから
 	ID3D12CommandQueue* commandQueue = nullptr;
@@ -994,11 +994,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//ウィンドウの×ボタンが押されるまでメインループ
-	while (msg.message != WM_QUIT) {
+	while (true) {
 		//WINDOWにメッセージが来てたら最優先で処理させる
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+		if (winApp->ProcessMessage()) {
+			//ゲームループを抜ける
+			break;
 		}
 		else {
 
