@@ -5,9 +5,9 @@
 #include <fstream>
 
 
-//クライアント領域のサイズ
-const int32_t kClientWidth = 1200;
-const int32_t kClientHeight = 720;
+////クライアント領域のサイズ
+//const int32_t kClientWidth = 1200;
+//const int32_t kClientHeight = 720;
 
 
 // -ウィンドウプロシーシャ
@@ -35,7 +35,8 @@ void WinApp::Initialize()
 	//COMの初期化 03_00 p12
 	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
-	WNDCLASS wc{};
+	//WNDCLASS wc{};//ウィンドウクラスの設定
+	
 	//ウィンドウプロシーシャ
 	wc.lpfnWndProc = WindowProc;
 	//ウィンドウクラス名
@@ -55,7 +56,7 @@ void WinApp::Initialize()
 	AdjustWindowRect(&wrc, WS_EX_OVERLAPPEDWINDOW, false);
 
 	//ウィンドウの生成
-	HWND hwnd = CreateWindow(
+	/*HWND*/ hwnd = CreateWindow(
 		wc.lpszClassName,     //利用するクラス名
 		L"CG2",               //タイトルバーの文字(何でもいい
 		WS_OVERLAPPEDWINDOW,  //よく見るウィンドウスタイル
