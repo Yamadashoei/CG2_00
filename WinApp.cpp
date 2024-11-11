@@ -1,18 +1,13 @@
 #include "WinApp.h"
 #include <wrl.h>
 #include "externals/imgui/imgui.h"
-#include "externals/imgui/imgui_impl_win32.cpp"
 #include <fstream>
 
 
-////クライアント領域のサイズ
-//const int32_t kClientWidth = 1200;
-//const int32_t kClientHeight = 720;
-
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 // -ウィンドウプロシーシャ
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
-	WPARAM wparam, LPARAM lparam) {
+LRESULT WinApp:: WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 	//Imguiのマウス操作
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
@@ -50,7 +45,7 @@ void WinApp::Initialize()
 	RegisterClass(&wc);
 
 	//ウィンドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0,0,kClientWidth,kClientHeight };
+	RECT wrc = { 0,0, WinApp::kClientWidth, WinApp::kClientHeight };
 
 	//クライアント領域をもとに実際のサイズにwrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_EX_OVERLAPPEDWINDOW, false);
@@ -75,4 +70,12 @@ void WinApp::Initialize()
 
 void WinApp::Update()
 {
+}
+
+void WinApp::Finalize()
+{
+	CloseWindow(hwnd);
+	CoUninitialize();
+
+
 }

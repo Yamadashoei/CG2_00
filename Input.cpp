@@ -1,20 +1,17 @@
 #include "Input.h"
 #include <cassert>
-#include <wrl.h>
-//using namespace Microsoft::WRL;
-
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
 
 
-void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
+void Input::Initialize(WinApp* winApp)
 {
 	HRESULT hr;
 	//DirectionInput
 	//IDirectInputDevice8* keyboard = nullptr;
 
 	hr = DirectInput8Create(
-		hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
+		winApp->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8,
 		(void**)&directInput, nullptr);
 	assert(SUCCEEDED(hr));
 
@@ -26,8 +23,11 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 	assert(SUCCEEDED(hr));
 	//排他制御レベルのセット
 	hr = keyboard->SetCooperativeLevel(
-		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+		winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(hr));
+
+	//借りてきたWinAppのインスタンスを記録
+	this->winApp_ = winApp;
 
 }
 
