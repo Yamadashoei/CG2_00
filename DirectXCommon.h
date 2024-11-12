@@ -1,12 +1,8 @@
 #pragma once
-class DirectX
+class DirectXCommon
 {
 public:
-	//初期化
 	void Initialize();
-
-
-
 
 
 };

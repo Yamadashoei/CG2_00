@@ -24,6 +24,7 @@
 
 #include "Input.h"
 #include "WinApp.h"
+#include "DirectXCommon.h"
 
 //03_04_p20~p27のエラー
 
@@ -433,6 +434,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//WindowsAPIの初期化
 	winApp = new WinApp();
 	winApp->Initialize();
+
 
 
 #ifdef _DEBUG
