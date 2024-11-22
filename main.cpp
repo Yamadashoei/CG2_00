@@ -58,12 +58,6 @@ struct ModelData {
 const int32_t kClientWidth = 1200;
 const int32_t kClientHeight = 720;
 
-void Log(const std::string& message) {
-	OutputDebugStringA(message.c_str());
-}
-void Log(const std::wstring& message) {
-	OutputDebugStringA(ConvertString(message).c_str());
-}
 
 //ウィンドウプロシーシャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
@@ -109,6 +103,12 @@ std::string ConvertString(const std::wstring& str) {
 	return result;
 }
 
+void Log(const std::string& message) {
+	OutputDebugStringA(message.c_str());
+}
+void Log(const std::wstring& message) {
+	OutputDebugStringA(ConvertString(message).c_str());
+}
 
 IDxcBlob* CompileShader(
 	const std::wstring& filePath,
