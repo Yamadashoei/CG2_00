@@ -10,6 +10,7 @@
 #include<dxcapi.h>
 #include<d3d12.h>
 #include<dxgi1_6.h>
+
 #include "Transform.h"
 
 #pragma comment(lib,"dxcompiler.lib")
@@ -21,10 +22,6 @@
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/DirectXTex.h"
-
-
-//p16resourcesあたりに
-//p17,18
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(
 	HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
@@ -38,7 +35,6 @@ struct Vector4 {
 struct Vector2 {
 	float x, y;
 };
-
 
 struct VertexData
 {
@@ -65,11 +61,11 @@ struct TransformationMatrix {
 const int32_t kClientWidth = 1200;
 const int32_t kClientHeight = 720;
 
+//02_02 p22　追加する
 Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
+Matrix4x4 projectionMatrix = Matrix4x4::MakePerspectiveMatrix(0.45f, float() / float(kClientHeight), 0.1f, 100.0f);
 Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-Matrix4x4 projectionMatrix = Matrix4x4::MakePerspectiveMatrix(0.45f, float(
-	) / float(kClientHeight), 0.1f, 100.0f);
 
 
 //ウィンドウプロシーシャ
@@ -131,41 +127,41 @@ void Log(const std::wstring& message) {
 IDxcBlob* CompileShader(
 	const std::wstring& filePath,
 	const wchar_t* profile,
-	//
 	IDxcUtils* dxcUtils,
 	IDxcCompiler3* dxcCompiler,
 	IDxcIncludeHandler* includeHandler) {
-
 	//シェーダーをコンパイルする旨をログに出す
 	Log(ConvertString(std::format(L"Begin CompileShader,path:{}\n", filePath, profile)));
-	//hlsl
+	//hlslファイルを読む
 	IDxcBlobEncoding* shaderSource = nullptr;
 	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	//読めなかったら止める
 	assert(SUCCEEDED(hr));
+	//読み込んだファイルの内容を設定する
 	DxcBuffer shaderSourceBuffer;
 	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
 	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
-	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
+	shaderSourceBuffer.Encoding = DXC_CP_UTF8;//UTF8の文字コードであることを通知
 
 	LPCWSTR arguments[] = {
-		filePath.c_str(),
-		L"-E",L"main",
-		L"-T",profile,
-		L"-Zi",L"-Qembed_debug",
-		L"-Od",
-		L"-Zpr" };
+		filePath.c_str(), //コンパイル対象のhlslファイル名
+		L"-E", L"main", //エントリーポイントの指定、基本的にmain以外にはしない
+		L"-T", profile, //ShaderProfileの設定
+		L"-Zi", L"-Qembed_debug", //デバッグ用の情報を埋め込む
+		L"-Od",   //最適化を外しておく
+		L"-Zpr"  //メモリレイアウトは行優先
+	};
 	//実際にShaderをコンパイルする
 	IDxcResult* shaderResult = nullptr;
 	hr = dxcCompiler->Compile(
-		&shaderSourceBuffer,
-		arguments,
-		_countof(arguments),
-		includeHandler,
-		IID_PPV_ARGS(&shaderResult)
+		&shaderSourceBuffer,  // 読み込んだファイル
+		arguments,         //コンパイルオプション
+		_countof(arguments), //コンパイルオプションの数
+		includeHandler,  //includeが含まれた諸々
+		IID_PPV_ARGS(&shaderResult) //コンパイル結果
 	);
+	//コンパイルエラーではなくdxcが起動できないなど致命的な状況
 	assert(SUCCEEDED(hr));
-
 	//警告・エラーが出たらログに出して止める
 	IDxcBlobUtf8* shaderError = nullptr;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
@@ -185,7 +181,6 @@ IDxcBlob* CompileShader(
 	shaderResult->Release();
 	//実行用のバイナリを返却
 	return shaderBlob;
-
 }
 
 //Resourceの作成関数
@@ -999,7 +994,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
-	device->CreateShaderResourceView(instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
+	device->CreateShaderResourceView(instancingResource, &instancingSrvDesc, instancingSrvHandleCPU);
 
 
 	//実際に頂点リソースを作る
