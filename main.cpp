@@ -266,7 +266,7 @@ ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMe
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);//Textureの次元数
 	//利用するHeapの設定
 	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT; //細かい設定を行う
+	heapProperties.Type = D3D12_HEAP_TYPE_CUSTOM; //細かい設定を行う
 	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK; //WriteBackポリシーでCPUアクセス可能
 	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0; //プロセッサの近くに配置
 
@@ -276,9 +276,9 @@ ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMe
 		&heapProperties, //Heapの設定
 		D3D12_HEAP_FLAG_NONE, //Heapの特殊な設定
 		&resourceDesc, //Resourceの設定
-		D3D12_RESOURCE_STATE_COPY_DEST, //データ転送される設定
+		D3D12_RESOURCE_STATE_GENERIC_READ, //データ転送される設定
 		nullptr, ////Clear最適値
-		IID_PPV_ARGS(&resource)); //作成するResorceポインタへのポインタ
+		IID_PPV_ARGS(&resource)); //作成するResourceポインタへのポインタ
 	assert(SUCCEEDED(hr));
 	return resource;
 }
@@ -301,7 +301,6 @@ void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mip
 		assert(SUCCEEDED(hr));
 	}
 }
-
 
 //DepthStencilTexture
 ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
@@ -1233,18 +1232,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			//描画！（DrawCall/ドローコール）
-			commandList->DrawInstanced(6, 1, 0, 0);
+			//commandList->DrawInstanced(6, 1, 0, 0);
 			//描画！6頂点の板ポリゴンを、kNumInstance（今回は10）だけInstance描画を行う
 			commandList->DrawInstanced(UINT(modelData.vertices.size()), 10, 0, 0);
 
 
-			//spriteの描画。変更が必要なものだけ変更する
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
-			//IndexBufferView 
-			commandList->IASetIndexBuffer(&indexBufferViewSprite);
-			//TransformationMatrixBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			////spriteの描画。変更が必要なものだけ変更する
+			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+			////IndexBufferView 
+			//commandList->IASetIndexBuffer(&indexBufferViewSprite);
+			////TransformationMatrixBufferの場所を設定
+			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
 			//ImGuiの内部コマンド生成 
@@ -1293,26 +1292,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #ifdef _DEBUG
 	//解放処理
-	vertexResource->Release();
-	graphicsPipelineState->Release();
-	signatureBlob->Release();
-	if (errorBlob) { errorBlob->Release(); }
-	rootSignature->Release();
-	pixelShaderBlob->Release();
-	vertexShaderBlob->Release();
-	materialResource->Release();
-	fence->Release();
-	rtvDescriptorHeap->Release();
-	swapChainResources[0]->Release();
-	swapChainResources[1]->Release();
-	swapChain->Release();
-	commandList->Release();
-	commandAllocator->Release();
-	commandQueue->Release();
-	device->Release();
-	useAdapter->Release();
-	dxgiFactory->Release();
-	debugController->Release();
+// シェーダー関連のリソース
+	vertexShaderBlob->Release(); // 頂点シェーダーのバイナリデータ
+	pixelShaderBlob->Release();  // ピクセルシェーダーのバイナリデータ
+	signatureBlob->Release();    // ルートシグネチャのバイナリデータ
+	if (errorBlob) {
+		errorBlob->Release();    // シェーダーコンパイルエラー情報のバッファ
+	}
+
+	// ルートシグネチャ関連
+	rootSignature->Release();    // ルートシグネチャ
+
+	// 描画リソース
+	vertexResource->Release();          // 頂点バッファのリソース
+	materialResource->Release();        // マテリアル情報のリソース（テクスチャ等）
+	graphicsPipelineState->Release();   // グラフィックスパイプラインのステートオブジェクト
+
+	// スワップチェーン関連
+	swapChainResources[0]->Release();   // スワップチェーンのバックバッファ（リソース0）
+	swapChainResources[1]->Release();   // スワップチェーンのバックバッファ（リソース1）
+	rtvDescriptorHeap->Release();       // レンダーターゲットビューのデスクリプタヒープ
+	swapChain->Release();               // スワップチェーンオブジェクト
+
+	// コマンド関連
+	commandList->Release();             // コマンドリスト（描画命令のバンドル）
+	commandAllocator->Release();        // コマンドリストのアロケータ
+	commandQueue->Release();            // GPUに命令を送るコマンドキュー
+
+	// 同期処理
+	fence->Release();                   // 同期処理に使用するフェンス
+
+	// デバイス関連
+	device->Release();                  // DirectXのデバイスオブジェクト
+	useAdapter->Release();              // 使用するアダプタ（GPU）オブジェクト
+	dxgiFactory->Release();             // DXGIファクトリー（スワップチェーンやアダプタ作成用）
+	debugController->Release();         // DirectXデバッグコントローラー
+
 #endif
 
 	//リソースチェック
