@@ -10,6 +10,8 @@
 
 #include <array>
 #include <dxcapi.h>
+#include "externals/DirectXTex/DirectXTex.h"
+
 
 
 //04_02_p12,13,17,18,20,2526,27,28,29,30
@@ -19,6 +21,9 @@ class DirectXCommon
 	//デスクリプターヒープを生成する
 	ID3D12DescriptorHeap* CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
+
+	ID3D12Resource* CreateBufferResource(size_t sizeInBytes);
+	
 
 public:
 
@@ -63,12 +68,24 @@ public:
 	//DSVの指定番号のGPUデスクリプタハンドルを取得する
 	D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGPUDescriptorHandle(uint32_t index);
 
+	//コンパイルシェーダ
+	IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile);//IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
+
+	ID3D12Resource* CreateTextureResource(const DirectX::TexMetadata& metadata);
+	void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages);
+	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
+
 	void SetWinApp(WinApp* winApp) { winApp_ = winApp; }
+
+	
 
 	//描画関数
 	void PreDraw();
 	void PostDraw();
 
+	//getter
+	ID3D12Device* GetDevice()const { return device; } //.Get()
+	ID3D12GraphicsCommandList* GetCommandList() const { return commandList; } //.Get()
 
 private:
 
@@ -125,9 +142,6 @@ private:
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
 	//指定番号のGPUデスクリプタハンドルを取得する
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
-
-	//コンパイルシェーダ
-	IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
 
 
 	uint64_t fenceValue = 0;
