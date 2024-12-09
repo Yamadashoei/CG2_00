@@ -16,7 +16,6 @@
 
 class DirectXCommon
 {
-
 	//デスクリプターヒープを生成する
 	ID3D12DescriptorHeap* CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
@@ -64,10 +63,11 @@ public:
 	//DSVの指定番号のGPUデスクリプタハンドルを取得する
 	D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGPUDescriptorHandle(uint32_t index);
 
-
 	void SetWinApp(WinApp* winApp) { winApp_ = winApp; }
 
-
+	//描画関数
+	void PreDraw();
+	void PostDraw();
 
 
 private:
@@ -92,10 +92,8 @@ private:
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	static const uint32_t MaxResource = 2;
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
-
 	//深度バッファ
 	ID3D12Resource* resource = nullptr;
-
 	//デスクリプタヒープ
 	ID3D12DescriptorHeap* descriptorHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
@@ -114,11 +112,10 @@ private:
 
 	//初期値0でFenceを作る
 	ID3D12Fence* fence = nullptr;
-
 	//ビューポート
 	D3D12_VIEWPORT viewport{};
 	//シザリング短径(シザー)
-	D3D12_RECT scissoringRect{};
+	D3D12_RECT scissorRect{};
 	//DXC
 	IDxcUtils* dxcUtils = nullptr;
 	IDxcCompiler3* dxcCompiler = nullptr;
@@ -130,12 +127,15 @@ private:
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	//コンパイルシェーダ
-	IDxcBlob* CompileShader(
-		const std::wstring& filePath,
-		const wchar_t* profile,
-		IDxcUtils* dxcUtils,
-		IDxcCompiler3* dxcCompiler,
-		IDxcIncludeHandler* includeHandler);
+	IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
+
+
+	uint64_t fenceValue = 0;
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	//TransitionBarrierの設定
+	D3D12_RESOURCE_BARRIER barrier{};
+
+
 
 };
 

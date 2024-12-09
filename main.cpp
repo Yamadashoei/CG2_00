@@ -1311,6 +1311,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //	dxgiFactory->Release();             // DXGIファクトリー（スワップチェーンやアダプタ作成用）
 //	debugController->Release();         // DirectXデバッグコントローラー
 
+	dxCommon->PreDraw();
+	dxCommon->PostDraw();
+
 #endif
 
 
