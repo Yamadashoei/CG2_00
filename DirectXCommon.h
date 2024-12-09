@@ -21,8 +21,6 @@ class DirectXCommon
 	//デスクリプターヒープを生成する
 	ID3D12DescriptorHeap* CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 	ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
-
-	ID3D12Resource* CreateBufferResource(size_t sizeInBytes);
 	
 
 public:
@@ -71,6 +69,7 @@ public:
 	//コンパイルシェーダ
 	IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile);//IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
 
+	ID3D12Resource* CreateBufferResource(size_t sizeInBytes);
 	ID3D12Resource* CreateTextureResource(const DirectX::TexMetadata& metadata);
 	void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages);
 	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
