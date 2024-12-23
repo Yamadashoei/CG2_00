@@ -416,7 +416,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//COMの初期化
-	CoInitializeEx(0, COINIT_MULTITHREADED);
+	//CoInitializeEx(0, COINIT_MULTITHREADED);
 
 	//ポインタ
 	WinApp* winApp = nullptr;
@@ -1233,6 +1233,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::Render();
 			//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
+dxCommon->PreDraw();
+
 			////画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 			////今回はRenderTargetからPresentにする
 			//barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -1268,10 +1270,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//assert(SUCCEEDED(hr));
 			//hr = commandList->Reset(commandAllocator, nullptr);
 			//assert(SUCCEEDED(hr));
+
+
+
+dxCommon->PostDraw();
+
+
 		}
 	}
-	////出力ウィンドウへの文字出力
-	//OutputDebugStringA("Hello,DirectX!\n");
+
+	//出力ウィンドウへの文字出力
+	OutputDebugStringA("Hello,DirectX!\n");
 
 #ifdef _DEBUG
 	//解放処理
@@ -1311,12 +1320,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //	dxgiFactory->Release();             // DXGIファクトリー（スワップチェーンやアダプタ作成用）
 //	debugController->Release();         // DirectXデバッグコントローラー
 
-	dxCommon->PreDraw();
-	dxCommon->PostDraw();
-
 #endif
-
-
+	
 	delete input;
 	//WindowsAPIの終了処理
 	winApp->Finalize();

@@ -131,7 +131,8 @@ private:
 
 
 	uint64_t fenceValue = 0;
-	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	//HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	HANDLE fenceEvent;
 	//TransitionBarrierの設定
 	D3D12_RESOURCE_BARRIER barrier{};
 
