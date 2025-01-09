@@ -1203,6 +1203,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//assert(SUCCEEDED(hr));
 			//hr = commandList->Reset(commandAllocator, nullptr);
 			//assert(SUCCEEDED(hr));
+			dxCommon->PreDraw();
+			dxCommon->PostDraw();
+
 		}
 	}
 	////出力ウィンドウへの文字出力
@@ -1246,8 +1249,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //	dxgiFactory->Release();             // DXGIファクトリー（スワップチェーンやアダプタ作成用）
 //	debugController->Release();         // DirectXデバッグコントローラー
 
-	dxCommon->PreDraw();
-	dxCommon->PostDraw();
 
 #endif
 
