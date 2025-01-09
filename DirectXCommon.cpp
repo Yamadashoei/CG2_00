@@ -176,7 +176,26 @@ ID3D12Resource* DirectXCommon::CreateTextureResource(const DirectX::TexMetadata&
 	return resource;
 }
 
+void DirectXCommon::UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages)
+{
+	// Meta情報を取得
+	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
+	//全MipMapについて
+	for (size_t mipLevel = 0; mipLevel < metadata.mipLevels; ++mipLevel) {
+		//MipMapLeveを指定して各Imageを取得
+		const DirectX::Image* img = mipImages.GetImage(mipLevel, 0, 0);
+		// Textureに転送
+		HRESULT hr = texture->WriteToSubresource(
+			UINT(mipLevel),
+			nullptr,
+			img->pixels,
+			UINT(img->rowPitch),
+			UINT(img->slicePitch)
+		);//枚サイズ
+		assert(SUCCEEDED(hr));
+	}
 
+}
 
 DirectX::ScratchImage DirectXCommon::LoadTexture(const std::string& filePath)
 {
@@ -388,6 +407,7 @@ void DirectXCommon::DescriptorHeap() {
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
 #pragma endregion
+
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetCPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index)
@@ -448,6 +468,7 @@ void DirectXCommon::RTV() {
 	assert(SUCCEEDED(hr));
 	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResources[1]));
 	assert(SUCCEEDED(hr));
+
 #pragma endregion
 
 #pragma region  RTVの設定
@@ -466,8 +487,6 @@ void DirectXCommon::RTV() {
 		device->CreateRenderTargetView(swapChainResources[i].Get(), &rtvDesc, rtvHandles[i]);
 	}
 
-
-
 #pragma endregion
 }
 
@@ -475,13 +494,15 @@ void DirectXCommon::RTV() {
 void DirectXCommon::DSV() {
 #pragma region DepthStencil
 	//DepthStencilTexture関数を使う
-	ID3D12Resource* depthStenceilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
+	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
 	//DSVの設定
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	//DSVHeapの先頭にDSVを作る
-	device->CreateDepthStencilView(depthStenceilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+
 #pragma endregion
 }
 
@@ -520,26 +541,6 @@ void DirectXCommon::ScissoringRect()
 }
 #pragma endregion
 
-void DirectXCommon::UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages)
-{
-	// Meta情報を取得
-	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
-	//全MipMapについて
-	for (size_t mipLevel = 0; mipLevel < metadata.mipLevels; ++mipLevel) {
-		//MipMapLeveを指定して各Imageを取得
-		const DirectX::Image* img = mipImages.GetImage(mipLevel, 0, 0);
-		// Textureに転送
-		HRESULT hr = texture->WriteToSubresource(
-			UINT(mipLevel),
-			nullptr,
-			img->pixels,
-			UINT(img->rowPitch),
-			UINT(img->slicePitch)
-		);//枚サイズ
-		assert(SUCCEEDED(hr));
-	}
-
-}
 
 //DXCコンパイルの生成
 void DirectXCommon::DXCCompiler(
@@ -663,7 +664,7 @@ void DirectXCommon::DXCCompiler(
 //	IDxcBlob* pixelShaderBlob = CompileShader(L"Particle.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 //	assert(pixelShaderBlob != nullptr);
 //#pragma endregion
-
+//
 	//#pragma region DepthStencilStateの設定
 	//	//DepthStencilStateの設定
 	//	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
