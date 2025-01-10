@@ -1199,7 +1199,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-
+			　
 #pragma region 描画先のRTVとDSVを設定する
 			//DSVを設定
 			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -1235,10 +1235,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//instancing用のDataを読むためにStructuredBufferのSRVを設定する
 			commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-
-
-
-
 
 
 
