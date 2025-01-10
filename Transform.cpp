@@ -101,6 +101,7 @@ Matrix4x4 MakeIdentity4x4() {
 	return ans;
 }
 
+
 //透視投影行列
 Matrix4x4 MakePerspectiveForMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
 {
@@ -234,4 +235,19 @@ Matrix4x4 Inverse(const Matrix4x4& m)
 		m.m[0][1] * m.m[1][0] * m.m[2][2] - m.m[0][0] * m.m[1][2] * m.m[2][1]) * recpDeterminant;
 
 	return result;
+}
+
+const Vector3 operator*(const Vector3& v, const float f) {
+	Vector3 result;
+	result.x = v.x * f;
+	result.y = v.y * f;
+	result.z = v.z * f;
+	return result;
+}
+
+Vector3& operator+=(Vector3& v1, const Vector3& v2) {
+	v1.x += v2.x;
+	v1.y += v2.y;
+	v1.z += v2.z;
+	return v1;
 }

@@ -2,6 +2,19 @@
 #include "Matrix4x4.h"
 #include "Vector3.h"
 
+// 変換用構造体
+// スケール、回転、平行移動をまとめて扱う
+struct Transform {
+    Vector3 scale;      // スケール（拡大・縮小）
+    Vector3 rotate;     // 回転（ラジアン単位）
+    Vector3 translate;  // 平行移動
+};
+
+struct Particle {
+    Transform transform;
+    Vector3 velocity;
+};
+
 // 行列を作成する関数
 // スケール行列を生成
 Matrix4x4 MakeScaleMatrix(const Vector3& scale);
@@ -30,10 +43,7 @@ Matrix4x4 Inverse(const Matrix4x4& m);
 // 単位行列（4x4）を生成
 Matrix4x4 MakeIdentity4x4();
 
-// 変換用構造体
-// スケール、回転、平行移動をまとめて扱う
-struct Transform { 
-    Vector3 scale;      // スケール（拡大・縮小）
-    Vector3 rotate;     // 回転（ラジアン単位）
-    Vector3 translate;  // 平行移動
-};
+const Vector3 operator*(const Vector3& v, const float f);
+
+Vector3& operator+=(Vector3& v1, const Vector3& v2);
+

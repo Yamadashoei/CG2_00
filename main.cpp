@@ -1070,12 +1070,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 	// Instancing用に最大数分のTransformを用意し、それぞれ位置が少しずつずれるように初期化する
-	Transform transforms[kNumInstance];
+	Particle particles[kNumInstance];
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		transforms[index].scale = { 1.0f, 1.0f, 1.0f };
-		transforms[index].rotate = { 0.0f, 0.0f, 0.0f };
-		transforms[index].translate = { index * 0.1f, index * 0.1f, index * 0.1f };
+		//particles[index].scale = { 1.0f, 1.0f, 1.0f };
+		//particles[index].rotate = { 0.0f, 0.0f, 0.0f };
+		//particles[index].translate = { index * 0.1f, index * 0.1f, index * 0.1f };
+		particles[index].velocity = { 0.0f,1.0f,0.0f };
 	}
+	// △tを定義。とりあえず60fps固定してあるが、実時間を計算して可変fpsで動かせるようにしておくとなお良い
+	const float kDeltaTime = 1.0f / 60.0f;
 
 #pragma region ImGuiの初期化
 	//ImGuiの初期化
@@ -1160,14 +1163,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite)); *transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 
-
 			Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
+
+			
 			// WVP等を計算して、Resourceに書き込む。メインループの中で行う
 			for (uint32_t index = 0; index < kNumInstance; ++index) {
-				Matrix4x4 worldMatrix = MakeAffineMatrix(transforms[index].scale, transforms[index].rotate, transforms[index].translate);
+				Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+				particles[index].transform.translate += particles[index].velocity * kDeltaTime;
 				instancingData[index].WVP = worldViewProjectionMatrix;
 				instancingData[index].World = worldMatrix;
+
+				
+
 			}
 
 #pragma region TransitionBarrierの設定
