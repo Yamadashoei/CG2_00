@@ -10,11 +10,6 @@ struct Transform {
     Vector3 translate;  // 平行移動
 };
 
-struct Particle {
-    Transform transform;
-    Vector3 velocity;
-};
-
 // 行列を作成する関数
 // スケール行列を生成
 Matrix4x4 MakeScaleMatrix(const Vector3& scale);
