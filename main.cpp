@@ -1072,9 +1072,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Instancing用に最大数分のTransformを用意し、それぞれ位置が少しずつずれるように初期化する
 	Particle particles[kNumInstance];
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		//particles[index].scale = { 1.0f, 1.0f, 1.0f };
-		//particles[index].rotate = { 0.0f, 0.0f, 0.0f };
-		//particles[index].translate = { index * 0.1f, index * 0.1f, index * 0.1f };
+		particles[index].transform.scale = { 1.0f, 1.0f, 1.0f };
+		particles[index].transform.rotate = { 0.0f, 0.0f, 0.0f };
+		particles[index].transform.translate = { index * 0.1f, index * 0.1f, index * 0.1f };
 		particles[index].velocity = { 0.0f,1.0f,0.0f };
 	}
 	// △tを定義。とりあえず60fps固定してあるが、実時間を計算して可変fpsで動かせるようにしておくとなお良い
