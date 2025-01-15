@@ -379,8 +379,19 @@ void DirectXCommon::SwapChain() {
 
 //深度バッファの生成
 void DirectXCommon::DepthBuffer() {
-#pragma region DepthStencilStateの設定
+//#pragma region DepthStencil
+//	//DepthStencilTexture関数を使う
+//	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
+//
+//	//DSVの設定
+//	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+//	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+//	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+//	//DSVHeapの先頭にDSVを作る
+//	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+//#pragma endregion
 
+#pragma region DepthStencilStateの設定
 	//DepthStencilStateの設定
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	//Depthの機能を有効化
@@ -405,7 +416,6 @@ void DirectXCommon::DescriptorHeap() {
 	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 	//DSV用のディスクリプタヒープの生成 05の範囲
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
-
 #pragma endregion
 
 }
@@ -501,7 +511,6 @@ void DirectXCommon::DSV() {
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	//DSVHeapの先頭にDSVを作る
 	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
 
 #pragma endregion
 }
