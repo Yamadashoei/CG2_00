@@ -1129,7 +1129,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//VBVを設定
 			dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 			//
-						//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
+			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
 			dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//マテリアルCBufferの場所を設定
 			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
