@@ -46,7 +46,7 @@ struct VertexData
 	Vector3 normal;
 };
 
-struct Transformationmatrix
+struct TransformationMatrix
 {
 	Matrix4x4 WVP;
 	Matrix4x4 World;
@@ -1005,9 +1005,9 @@ rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
 		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Transformationmatrix));
+	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(TransformationMatrix));
 	//データ書き込み
-	Transformationmatrix* wvpData = nullptr;
+	TransformationMatrix* wvpData = nullptr;
 	//書き込むためのアドレスを取得
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 	//単位行列を書き込んでおく
@@ -1187,7 +1187,7 @@ rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			//cameraのCBufferの場所を設定
+			//directionalLightのCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLight->GetGPUVirtualAddress());
 
 			//cameraのCBufferの場所を設定
