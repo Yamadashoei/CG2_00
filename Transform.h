@@ -30,6 +30,10 @@ Matrix4x4 Inverse(const Matrix4x4& m);
 // 単位行列（4x4）を生成
 Matrix4x4 MakeIdentity4x4();
 
+const Vector3 operator*(const Vector3& v, const float f);
+
+Vector3& operator+=(Vector3& v1, const Vector3& v2);
+
 // 変換用構造体
 // スケール、回転、平行移動をまとめて扱う
 struct Transform {
