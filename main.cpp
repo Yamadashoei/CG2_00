@@ -1218,12 +1218,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//commandList->DrawInstanced(kVertexCount, 1, 0, 0);
 			//IndexBufferView 
 			commandList->DrawInstanced(UINT(kVertexCount), 1, 0, 0);
-			commandList->IASetIndexBuffer(&indexBufferViewSprite);
+			//commandList->IASetIndexBuffer(&indexBufferViewSprite);
 			//spriteの描画。変更が必要なものだけ変更する
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 			//TransformationMatrixBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
 			//ImGuiの内部コマンド生成 
