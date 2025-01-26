@@ -860,7 +860,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ModelData modelData = LoadObjFile("resources", "plane.obj");
 
 
-
 	//カメラ用のリソース
 	ID3D12Resource* cameraResource = CreateBufferResource(device, sizeof(CameraForGPU));
 	//マテリアルにデータを書き込む
@@ -1134,6 +1133,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
 			ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
+			//phoneシェーディング
+			float direction[3] = { directionalLightSphereData->direction.x,directionalLightSphereData->direction.y,directionalLightSphereData->direction.z };
+			if (ImGui::DragFloat3("phone", direction, 0.01f)) {
+				directionalLightSphereData->direction.x = direction[0];
+				directionalLightSphereData->direction.y = direction[1];
+				directionalLightSphereData->direction.z = direction[2];
+			}
+
 			//色変え
 			ImGui::ColorEdit3("color", &materialData->color.x);
 			ImGui::End();
