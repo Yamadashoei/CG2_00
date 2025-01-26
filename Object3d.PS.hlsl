@@ -36,36 +36,35 @@ SamplerState gSampler : register(s0);
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
-    //03_00 p43 p49
-    float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
-    output.color = gMaterial.color * textureColor;
-    
+    float4 textureColor = gTexture.Sample(gSampler, input.texcoord);
+ 
     if (gMaterial.enableLighting != 0)
     {
-        float cos = saturate(dot(normalize(input.normal), normalize(-gDirectionalLight.direction)));
-        output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
-        float32_t3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
+        float NdotL = dot(normalize(input.normal), normalize(-gDirectionalLight.direction));
+        float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
 
-        float32_t3 reflectLight = reflect(normalize(gDirectionalLight.direction), normalize(input.normal));
+        float3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
+        float3 reflectLight = reflect(normalize(gDirectionalLight.direction), normalize(input.normal));
+
         float RdotE = dot(reflectLight, toEye);
-        float specularPow = pow(saturate(RdotE), gMaterial.shininess); //îΩéÀã≠ìx
-    
-    
-        float32_t3 diffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
-    //ãæñ îΩéÀ
-        float32_t3 specular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
-    // ägéUîΩéÀÅEãæñ îΩéÀ
+        float specularPow = pow(saturate(RdotE), 70.0f); //shinesílïœçX
+
+     // ägéUîΩéÀ
+        float3 diffuse =
+     gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
+     // ãæñ îΩéÀ
+        float3 specular =
+     gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float3(1.0f, 1.0f, 1.0f);
+     // ägéUîΩéÀ+ãæñ îΩéÀ
         output.color.rgb = diffuse + specular;
-    // ÉAÉãÉtÉ@ÇÕç°Ç‹Ç≈í ÇË
+     // ÉAÉãÉtÉ@ÇÕç°Ç‹Ç≈í ÇË
         output.color.a = gMaterial.color.a * textureColor.a;
     }
     else
     {
         output.color = gMaterial.color * textureColor;
+
     }
-   
-    //PixelShaderOutput.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
-       
-    
+ 
     return output;
 }
