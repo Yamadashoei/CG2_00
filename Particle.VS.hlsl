@@ -1,11 +1,13 @@
 #include "Particle.hlsli"
 
-struct Transformationmatrix
+struct ParticleForGPU
 {
     float32_t4x4 WVP;
     float32_t4x4 World;
+    float32_t4 color;
 };
-StructuredBuffer<Transformationmatrix> gTransformationMatrices : register(t0);
+//StructuredBuffer<Transformationmatrix> gTransformationMatrices : register(t0);
+StructuredBuffer<ParticleForGPU> gParticle : register(t0);
 
 struct VertexShaderInput
 {
@@ -16,9 +18,10 @@ struct VertexShaderInput
 VertexShaderOutput main(VertexShaderInput input, uint32_t instanceId : SV_InstanceID)
 {
     VertexShaderOutput output;
-    output.position = mul(input.position, gTransformationMatrices[instanceId].WVP);
+    output.position = mul(input.position, gParticle[instanceId].WVP);
     output.texcoord = input.texcoord;
-   //normal 05
+    output.color = gParticle[instanceId].color;
+   //normal 05????
     
     return output;
 };
