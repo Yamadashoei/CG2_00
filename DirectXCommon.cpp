@@ -9,13 +9,12 @@
 #include"externals/imgui/imgui.h"
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 using namespace Microsoft::WRL;
 using namespace Logger;
 using namespace StringUtility;
-
-
 
 
 IDxcBlob* DirectXCommon::CompileShader(
@@ -379,17 +378,6 @@ void DirectXCommon::SwapChain() {
 
 //深度バッファの生成
 void DirectXCommon::DepthBuffer() {
-//#pragma region DepthStencil
-//	//DepthStencilTexture関数を使う
-//	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
-//
-//	//DSVの設定
-//	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-//	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-//	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-//	//DSVHeapの先頭にDSVを作る
-//	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-//#pragma endregion
 
 #pragma region DepthStencilStateの設定
 	//DepthStencilStateの設定
@@ -684,31 +672,6 @@ void DirectXCommon::DXCCompiler(
 	//	//比較関数はLessEqual
 	//	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	//#pragma endregion
-
-		//D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-		//graphicsPipelineStateDesc.pRootSignature = rootSignature;// RootSignature
-		//graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;// InputLayout
-		//graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),vertexShaderBlob->GetBufferSize() };// VertexShader
-		//graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),pixelShaderBlob->GetBufferSize() };// PixelShader
-		//graphicsPipelineStateDesc.BlendState = blendDesc;// BlendState
-		//graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;// RasterizerState
-		////書き込むRTVの情報
-		//graphicsPipelineStateDesc.NumRenderTargets = 1;
-		//graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		////利用するトポロジ(形状)のタイプ。三角形
-		//graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		////どのように画面に色を打ち込むかの設定(気にしなくて良い)
-		//graphicsPipelineStateDesc.SampleDesc.Count = 1;
-		//graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-		////DepthStencilをPSOに代入
-		//graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
-		//graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-		////実際に生成
-		//ID3D12PipelineState* graphicsPipelineState = nullptr;
-		//hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
-		//assert(SUCCEEDED(hr));
-
 
 }
 

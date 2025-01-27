@@ -63,7 +63,7 @@ struct TransformationMatrix {
 };
 
 //クライアント領域のサイズ
-const int32_t kClientWidth = 1200;
+const int32_t kClientWidth = 1280;
 const int32_t kClientHeight = 720;
 
 Transform transform{ {0.5f,0.5f,0.5f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
@@ -580,7 +580,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGBに変換して書き込む
 	//	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2dテクスチャとして書き込む
 	//	//ディスクリプタの先頭を取得する
-	//	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap->	();
+	//	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap->	GetCPUDescriptorHandleForHeapStart();
 	//	//RTVを2つ作るのでディスクリプタを2つ用意
 	//	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	//	//まず1つ目を作る。1つ目は最初のところに作る。作る場所をこちらで指定してあげる必要がある
@@ -635,11 +635,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; //Offsetを自動計算
 
 
-	D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
-	descriptorRangeForInstancing[0].BaseShaderRegister = 0; // から始まる
-	descriptorRangeForInstancing[0].NumDescriptors = 1;    // 数は1つ
-	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
-	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	//D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
+	//descriptorRangeForInstancing[0].BaseShaderRegister = 0; // から始まる
+	//descriptorRangeForInstancing[0].NumDescriptors = 1;    // 数は1つ
+	//descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
+	//descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	//RootParameter作成
 	D3D12_ROOT_PARAMETER rootParameters[3] = {};
@@ -647,10 +647,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; //PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0; //レジスタ番号0とバインド
 
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;         // VertexShaderで使う
-	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing; // Tableの中身の配列を指定
-	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing); // Tableで利用する数
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// DescriptorTableを使う
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;// VertexShaderで使う
+	rootParameters[1].Descriptor.ShaderRegister = 0;//Object3d.VS.hlsl の b0
+	//rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	//rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;         // VertexShaderで使う
+	//rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing; // Tableの中身の配列を指定
+	//rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing); // Tableで利用する数
 
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;//DescriptorTableを使う
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; //PixelShaderで使う
@@ -698,7 +701,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputElementDescs[1].SemanticIndex = 0;
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
@@ -722,10 +724,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region Shaderのコンパイル
 	//ShaderをCompileする
-	IDxcBlob* vertexShaderBlob = dxCommon->CompileShader(L"resources/shaders/Particle.VS.hlsl", L"vs_6_0");
+	IDxcBlob* vertexShaderBlob = dxCommon->CompileShader(L"Object3d.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = dxCommon->CompileShader(L"resources/shaders/Particle.PS.hlsl", L"vs_6_0");
+	IDxcBlob* pixelShaderBlob = dxCommon->CompileShader(L"Object3d.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 #pragma endregion
@@ -753,7 +755,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	//利用するトポロジ(形状)のタイプ。三角形
-	graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	graphicsPipelineStateDesc.PrimitiveTopologyType =D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	//どのように画面に色を打ち込むかの設定(気にしなくて良い)
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
@@ -770,7 +772,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//モデルデータ読み込み
 	ModelData modelData = LoadObjFile("resources", "plane.obj");
 
-	//DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
+	DirectX::ScratchImage mipImages2 = DirectXCommon::LoadTexture(modelData.material.textureFilePath);
 
 #pragma region VertexResourceの生成
 	//実際に頂点リソースを作る
@@ -968,45 +970,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 #pragma region Resourceの作成
-	const uint32_t kNumInstance = 10; // インスタンス数
-
-	ID3D12Resource* instancingResource = dxCommon->CreateBufferResource(sizeof(TransformationMatrix) * kNumInstance);
-	//データを書き込む
-	TransformationMatrix* instancingData = nullptr;
-	//書き込むためのアドレスを取得
-	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
-	// 初期化処理をここでおこなう
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		instancingData[index].WVP = MakeIdentity4x4(); // 単位行列を設定
-		instancingData[index].World = MakeIdentity4x4(); // 単位行列を設定
-	}
+	
 #pragma endregion
 
-	//追加
-	//#pragma region SRV (ShaderResourceView)
-	//	//metadataを基にSRVの設定
-	//	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
-	//	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	//	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;//2Dテクスチャ
-	//	instancingSrvDesc.Buffer.FirstElement = 0;
-	//	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	//	instancingSrvDesc.Buffer.NumElements = kNumInstance;
-	//	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
-	//	//SRVを作成するDescriptorHeapの場所を決める
-	//	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = dsvDescriptorHeap->GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
-	//	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = dsvDescriptorHeap->GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
-	//	//SRVの生成
-	//	dxCommon->GetDevice()->CreateShaderResourceView(instancingResource, &instancingSrvDesc, instancingSrvHandleCPU);
-	//#pragma endregion
-
-		// Instancing用に最大数分のTransformを用意し、それぞれ位置が少しずつずれるように初期化する
-	Transform transforms[kNumInstance];
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		transforms[index].scale = { 1.0f, 1.0f, 1.0f };
-		transforms[index].rotate = { 0.0f, 0.0f, 0.0f };
-		transforms[index].translate = { index * 0.1f, index * 0.1f, index * 0.1f };
-	}
 
 	//#pragma region ImGuiの初期化
 	//	//ImGuiの初期化
@@ -1083,8 +1049,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			transform.rotate.y += 0.03f;
 			worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate); *wvpData = worldMatrix;
+			worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			viewMatrixSprite = MakeIdentity4x4();
+			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite)); *transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 
-			//コメ解除
+			////コメ解除
+			//Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 			//// WVP等を計算して、Resourceに書き込む。メインループの中で行う
 			//for (uint32_t index = 0; index < kNumInstance; ++index) {
 			//	Matrix4x4 worldMatrix = MakeAffineMatrix(transforms[index].scale, transforms[index].rotate, transforms[index].translate);
@@ -1114,7 +1085,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //			//DSVを設定
 //			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 //			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
-//			//指定した色で画面全体をクリアする
+//			
+// //指定した色で画面全体をクリアする
 //			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; //青っぽい色。RGBAの順
 //			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 //			//指定した深度で画面全体をクリアする
@@ -1139,8 +1111,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//マテリアルCBufferの場所を設定
 			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
 			//wvp用のCBufferの場所を設定
+			// 定数バッファビューを0番目のパラメータで設定
 			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+			//dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 			//instancing用のDataを読むためにStructuredBufferのSRVを設定する
 			//dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
@@ -1152,7 +1127,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			dxCommon->GetCommandList()->DrawInstanced(6, 1, 0, 0);
 			//描画！6頂点の板ポリゴンを、kNumInstance（今回は10）だけInstance描画を行う
 
-			dxCommon->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 10, 0, 0);
+			//パーティクル
+			dxCommon->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 
 			//spriteの描画。変更が必要なものだけ変更する
@@ -1213,41 +1189,41 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #ifdef _DEBUG
 	//解放処理
-//// シェーダー関連のリソース
-//	vertexShaderBlob->Release(); // 頂点シェーダーのバイナリデータ
-//	pixelShaderBlob->Release();  // ピクセルシェーダーのバイナリデータ
-//	signatureBlob->Release();    // ルートシグネチャのバイナリデータ
-//	if (errorBlob) {
-//		errorBlob->Release();    // シェーダーコンパイルエラー情報のバッファ
-//	}
-//
-//	// ルートシグネチャ関連
-//	rootSignature->Release();    // ルートシグネチャ
-//
-//	// 描画リソース
-//	vertexResource->Release();          // 頂点バッファのリソース
-//	materialResource->Release();        // マテリアル情報のリソース（テクスチャ等）
-//	graphicsPipelineState->Release();   // グラフィックスパイプラインのステートオブジェクト
-//
-//	// スワップチェーン関連
-//	swapChainResources[0]->Release();   // スワップチェーンのバックバッファ（リソース0）
-//	swapChainResources[1]->Release();   // スワップチェーンのバックバッファ（リソース1）
-//	rtvDescriptorHeap->Release();       // レンダーターゲットビューのデスクリプタヒープ
-//	swapChain->Release();               // スワップチェーンオブジェクト
-//
-//	// コマンド関連
-//	commandList->Release();             // コマンドリスト（描画命令のバンドル）
-//	commandAllocator->Release();        // コマンドリストのアロケータ
-//	commandQueue->Release();            // GPUに命令を送るコマンドキュー
-//
-//	// 同期処理
-//	fence->Release();                   // 同期処理に使用するフェンス
-//
-//	// デバイス関連
-//	device->Release();                  // DirectXのデバイスオブジェクト
-//	useAdapter->Release();              // 使用するアダプタ（GPU）オブジェクト
-//	dxgiFactory->Release();             // DXGIファクトリー（スワップチェーンやアダプタ作成用）
-//	debugController->Release();         // DirectXデバッグコントローラー
+// シェーダー関連のリソース
+	vertexShaderBlob->Release(); // 頂点シェーダーのバイナリデータ
+	pixelShaderBlob->Release();  // ピクセルシェーダーのバイナリデータ
+	signatureBlob->Release();    // ルートシグネチャのバイナリデータ
+	if (errorBlob) {
+		errorBlob->Release();    // シェーダーコンパイルエラー情報のバッファ
+	}
+
+	// ルートシグネチャ関連
+	rootSignature->Release();    // ルートシグネチャ
+
+	// 描画リソース
+	vertexResource->Release();          // 頂点バッファのリソース
+	materialResource->Release();        // マテリアル情報のリソース（テクスチャ等）
+	graphicsPipelineState->Release();   // グラフィックスパイプラインのステートオブジェクト
+
+	//// スワップチェーン関連
+	//swapChainResources[0]->Release();   // スワップチェーンのバックバッファ（リソース0）
+	//swapChainResources[1]->Release();   // スワップチェーンのバックバッファ（リソース1）
+	//rtvDescriptorHeap->Release();       // レンダーターゲットビューのデスクリプタヒープ
+	//swapChain->Release();               // スワップチェーンオブジェクト
+
+	//// コマンド関連
+	//commandList->Release();             // コマンドリスト（描画命令のバンドル）
+	//commandAllocator->Release();        // コマンドリストのアロケータ
+	//commandQueue->Release();            // GPUに命令を送るコマンドキュー
+
+	//// 同期処理
+	//fence->Release();                   // 同期処理に使用するフェンス
+
+	//// デバイス関連
+	//device->Release();                  // DirectXのデバイスオブジェクト
+	//useAdapter->Release();              // 使用するアダプタ（GPU）オブジェクト
+	//dxgiFactory->Release();             // DXGIファクトリー（スワップチェーンやアダプタ作成用）
+	//debugController->Release();         // DirectXデバッグコントローラー
 
 
 #endif

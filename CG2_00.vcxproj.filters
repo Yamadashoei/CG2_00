@@ -130,9 +130,7 @@
       <Filter>リソース ファイル</Filter>
     </None>
     <None Include="cpp.hint" />
-    <None Include="..\..\..\CG3_実行できる長方形\Particle.hlsli">
-      <Filter>リソース ファイル</Filter>
-    </None>
+    <None Include="Particle.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -141,11 +139,7 @@
     <FxCompile Include="resources\shaders\Object3d.VS.hlsl">
       <Filter>リソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\..\CG3_実行できる長方形\Particle.PS.hlsl">
-      <Filter>リソース ファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\..\CG3_実行できる長方形\Particle.VS.hlsl">
-      <Filter>リソース ファイル</Filter>
-    </FxCompile>
+    <FxCompile Include="Particle.PS.hlsl" />
+    <FxCompile Include="Particle.VS.hlsl" />
   </ItemGroup>
 </Project>
