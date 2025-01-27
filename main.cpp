@@ -661,7 +661,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
 	assert(SUCCEEDED(hr));
 
-	//現時点ではincludeはしないが、includeに対応するための設定を行っておく
+	//現時点では includeはしないが、includeに対応するための設定を行っておく
 	IDxcIncludeHandler* includeHandler = nullptr;
 	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
@@ -829,7 +829,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
 	//1頂点あたりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
-
 #pragma region VertexBufferViewを作成
 	//頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
@@ -1008,7 +1007,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	MSG msg{};
 
-
 	//ImGuiの初期化 02_03 p14
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -1035,12 +1033,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-			//開発用のUIの処理
-			//ImGui::ShowDemoWindow();
-			//ImGui色変え
+			//ImGui 1枚目
 			ImGui::Begin("Model");
 			ImGui::DragFloat3("color", &materialData->x, 0.01f);
-
 			ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
 			ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
@@ -1048,9 +1043,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ColorEdit3("color", &materialData->x);
 			ImGui::End();
 
+			//ImGui 2枚目
 			ImGui::Begin("Window");
 			ImGui::DragFloat3("spriteColor", &materialData->x, 0.01f);
-
 			ImGui::DragFloat3("spriteScale", &transformSprite.scale.x, 0.01f);
 			ImGui::DragFloat3("spriteRotate", &transformSprite.rotate.x, 0.01f);
 			ImGui::DragFloat3("spriteTranslate", &transformSprite.translate.x, 0.01f);
@@ -1058,22 +1053,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ColorEdit3("spriteColor", &materialData->x);
 			ImGui::End();
 
-			//これから書き込むバックバッファのインデックスを取得　p26
+			//これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
-			//02_02 p15 追加する
 			transform.rotate.y += 0.03f;
-			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-			*wvpData = worldMatrix;
-
-			//WVPMatrix 04_00 p12
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
+			worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate); *wvpData = worldMatrix;
+			worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			viewMatrixSprite = MakeIdentity4x4();
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
-			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
-			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
+			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite)); *transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 
-			//TransitionBarrierの設定 01_02 p6
+#pragma region TransitionBarrierの設定
+			//TransitionBarrierの設定
 			D3D12_RESOURCE_BARRIER barrier{};
 			//今回のバリアはTransition
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1085,77 +1076,66 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 			//遷移後ResourceState
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-
-			//DSVを設定 03_01 p24
-			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
-
-			//指定した深度で画面全体をクリアする 03_01 p24
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
 			//TransitionBarrierを張る
 			commandList->ResourceBarrier(1, &barrier);
+#pragma endregion
+
+
+#pragma region 描画先のRTVとDSVを設定する
+			//DSVを設定
+			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
 
 			//指定した色で画面全体をクリアする
 			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; //青っぽい色。RGBAの順
 			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
+			//指定した深度で画面全体をクリアする 
+			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
 			//描画用のDescriptorHeapの設定
 			ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
 			commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
+			//コマンドを積む
+			commandList->RSSetViewports(1, &viewport); //Viewportを設定
+			commandList->RSSetScissorRects(1, &scissorRect); //scissorを設定
+#pragma endregion
 
-			//コマンドを積む 02_00 p48
-			commandList->RSSetViewports(1, &viewport);//Viewportを設定
-			commandList->RSSetScissorRects(1, &scissorRect);
-			// Scirssorを設定
 			//RootSignatureを設定。PS0に設定しているけど別途設定が必要
 			commandList->SetGraphicsRootSignature(rootSignature);
-			commandList->SetPipelineState(graphicsPipelineState);// PSOを設定
+			// PSOを設定
+			commandList->SetPipelineState(graphicsPipelineState);
 			//VBVを設定
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-
-			//形状を設定。PSに設定しているものとはまた別。同じものを設定すると考えておけば良い
-
+			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-			//マテリアルCBufferの場所を設定 02_01 p15
+			//マテリアルCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-
-			//02_02 p10
+			//wvp用のCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-
-			//03_00 p50
+			//instancing用のDataを読むためにStructuredBufferのSRVを設定する
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			//描画！
+			//描画！（DrawCall/ドローコール）
 			commandList->DrawInstanced(6, 1, 0, 0);
-
-			//IndexBufferView 06_00 p8
-			commandList->IASetIndexBuffer(&indexBufferViewSprite);
+			//パーティクル
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 			//spriteの描画。変更が必要なものだけ変更する
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+			//IndexBufferView
+			commandList->IASetIndexBuffer(&indexBufferViewSprite);
 			//TransformationMatrixBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-
-			//描画!(Drawcall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
-			//commandList->DrawInstanced(6, 1, 0, 0);
-
-			//06_00 p8
 			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
-			//06_02 p17
-			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 			//ImGuiの内部コマンド生成 02_03 p15
 			ImGui::Render();
-
-			//02_03 p16
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
-			//画面に描く処理はすべて終わり、画面に映すので、状態を遷移 01_02 p8
+			//画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 			// 今回はRenderTargetからPresentにする
 			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1166,7 +1146,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			hr = commandList->Close();
 			assert(SUCCEEDED(hr));
 
-			//GPUにコマンドリストの実行を行わせる p27
+			//GPUにコマンドリストの実行を行わせる
 			ID3D12CommandList* commandLists[] = { commandList };
 			commandQueue->ExecuteCommandLists(1, commandLists);
 			//GPUとOSに画面の交換を行うように通知する
@@ -1178,7 +1158,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// Fenceの値を指定した値に代入するようにSignalを送る
 			commandQueue->Signal(fence, fenceValue);
 
-			//Fenceの値が指定したSignal値にたどり着いているか確認する 01_02 p17
+			//Fenceの値が指定したSignal値にたどり着いているか確認する
 			//GetCompletedValueの初期化はFence作成時に渡した初期値
 			if (fence->GetCompletedValue() < fenceValue) {
 				//指定したSignalにたどり着いていないので、
@@ -1198,36 +1178,47 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
-	//解放処理 02_00 p49
-	vertexResource->Release();
-	graphicsPipelineState->Release();
-	signatureBlob->Release();
-	if (errorBlob) {
-		errorBlob->Release();
-	}
-	rootSignature->Release();
-	pixelShaderBlob->Release();
-	vertexShaderBlob->Release();
-	materialResource->Release();
-	CloseHandle(fenceEvent);
-	fence->Release();
-	rtvDescriptorHeap->Release();
-	swapChainResources[0]->Release();
-	swapChainResources[1]->Release();
-	swapChain->Release();
-	commandList->Release();
-	commandAllocator->Release();
-	commandQueue->Release();
-	device->Release();
-	useAdapter->Release();
-	dxgiFactory->Release();
-
 #ifdef _DEBUG
-	debugController->Release();
+	//解放処理
+// シェーダー関連のリソース
+	vertexShaderBlob->Release(); // 頂点シェーダーのバイナリデータ
+	pixelShaderBlob->Release();  // ピクセルシェーダーのバイナリデータ
+	signatureBlob->Release();    // ルートシグネチャのバイナリデータ
+	if (errorBlob) {
+		errorBlob->Release();    // シェーダーコンパイルエラー情報のバッファ
+	}
+
+	// ルートシグネチャ関連
+	rootSignature->Release();    // ルートシグネチャ
+
+	// 描画リソース
+	vertexResource->Release();          // 頂点バッファのリソース
+	materialResource->Release();        // マテリアル情報のリソース（テクスチャ等）
+	graphicsPipelineState->Release();   // グラフィックスパイプラインのステートオブジェクト
+
+	// スワップチェーン関連
+	swapChainResources[0]->Release();   // スワップチェーンのバックバッファ（リソース0）
+	swapChainResources[1]->Release();   // スワップチェーンのバックバッファ（リソース1）
+	rtvDescriptorHeap->Release();       // レンダーターゲットビューのデスクリプタヒープ
+	swapChain->Release();               // スワップチェーンオブジェクト
+
+	// コマンド関連
+	commandList->Release();             // コマンドリスト（描画命令のバンドル）
+	commandAllocator->Release();        // コマンドリストのアロケータ
+	commandQueue->Release();            // GPUに命令を送るコマンドキュー
+
+	// 同期処理
+	fence->Release();                   // 同期処理に使用するフェンス
+
+	// デバイス関連
+	device->Release();                  // DirectXのデバイスオブジェクト
+	useAdapter->Release();              // 使用するアダプタ（GPU）オブジェクト
+	dxgiFactory->Release();             // DXGIファクトリー（スワップチェーンやアダプタ作成用）
+	debugController->Release();         // DirectXデバッグコントローラー
 #endif
 
 	CloseWindow(hwnd);
-	//COMの初期化終了 03_00 p12
+	//COMの初期化終了
 	CoUninitialize();
 
 	//リソースチェック
