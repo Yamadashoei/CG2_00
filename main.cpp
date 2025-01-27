@@ -1328,7 +1328,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #endif
 
 	CloseWindow(hwnd);
-	//COMの初期化終了
+	 ///COMの初期化終了
 	CoUninitialize();
 
 	//リソースチェック
