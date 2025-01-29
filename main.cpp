@@ -108,6 +108,10 @@ Particle MakeNewParticle(std::mt19937& randomEngine) {
 	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
 	particle.color = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
 
+	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
+	particle.lifeTime = distTime(randomEngine);
+	particle.currentTime = 0;
+
 	return particle;
 }
 
@@ -843,7 +847,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//Depthの機能を有効化
 	depthStencilDesc.DepthEnable = true;
 	//書き込む
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;//CG3-01_01_P26に変更
 	//比較関数はLessEqual
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 #pragma endregion
@@ -905,7 +909,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region Textureを読んで転送
 	//Textureを読んで転送する
-	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	//DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resources/circle.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CreateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
@@ -1072,15 +1077,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 #pragma region Resourceの作成
-	const uint32_t kNumInstance = 10; // インスタンス数
-	ID3D12Resource* instancingResource = CreateBufferResource(device, sizeof(ParticleForGPU) * kNumInstance);
+	const uint32_t kNumMaxInstance = 10; // インスタンス数
+	ID3D12Resource* instancingResource = CreateBufferResource(device, sizeof(ParticleForGPU) * kNumMaxInstance);
 	//ID3D12Resource* instancingResource = CreateBufferResource(device, sizeof(ParticleForGPU) * kNumInstance);
 	//データを書き込む
 	ParticleForGPU* instancingData = nullptr;
 	//書き込むためのアドレスを取得
 	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
 	// 初期化処理をここでおこなう
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
+	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 		instancingData[index].WVP = MakeIdentity4x4(); // 単位行列を設定
 		instancingData[index].World = MakeIdentity4x4(); // 単位行列を設定
 	}
@@ -1094,7 +1099,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;//2Dテクスチャ
 	instancingSrvDesc.Buffer.FirstElement = 0;
 	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = kNumInstance;
+	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
 	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 	//SRVを作成するDescriptorHeapの場所を決める
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
@@ -1104,9 +1109,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 	// Instancing用に最大数分のTransformを用意し、それぞれ位置が少しずつずれるように初期化する
-	Particle particles[kNumInstance];
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
+	Particle particles[kNumMaxInstance];
+	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 		particles[index] = MakeNewParticle(randomEngine);
+
 		instancingData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 		//instancingData[index].color = particles[index].color;
 		particles[index].transform.scale = { 1.0f, 1.0f, 1.0f };
@@ -1173,35 +1179,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
 			ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
+
+			if (ImGui::TreeNode("Particle")) {
+				ImGui::DragFloat3("Scale", &particles[0].transform.scale.x, 0.01f);
+				ImGui::DragFloat3("Rotate", &particles[0].transform.rotate.x, 0.01f);
+				ImGui::DragFloat3("Translate", &particles[0].transform.translate.x, 0.01f);
+			}
+
 			//色変え
 			ImGui::ColorEdit3("color", &materialData->x);
 			ImGui::End();
 
-			//ImGui 2枚目
-			ImGui::Begin("Window");
-			ImGui::DragFloat3("spriteColor", &materialData->x, 0.01f);
-			ImGui::DragFloat3("spriteScale", &transformSprite.scale.x, 0.01f);
-			ImGui::DragFloat3("spriteRotate", &transformSprite.rotate.x, 0.01f);
-			ImGui::DragFloat3("spriteTranslate", &transformSprite.translate.x, 0.01f);
-			//色変え
-			ImGui::ColorEdit3("spriteColor", &materialData->x);
-			ImGui::End();
-
-			////ImGui 板ポリ(パーティクル)
-			//ImGui::Begin("Partucle");
-			//ImGui::DragFloat3("spriteColor", &materialData->x, 0.01f);
-			//ImGui::DragFloat3("spriteScale", &transformSprite.scale.x, 0.01f);
-			//ImGui::DragFloat3("spriteRotate", &transformSprite.rotate.x, 0.01f);
-			//ImGui::DragFloat3("spriteTranslate", &transformSprite.translate.x, 0.01f);
-			////for (uint32_t index = 0; index < kNumInstance; ++index) {
-			////	particles[index] = MakeNewParticle(randomEngine);
-			////	// instancingData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-			////	instancingData[index].color = particles[index].color;
-			////}
-			////色変え
-			////ImGui::ColorEdit3("spriteColor", &materialData->x);
-			//ImGui::End();
-
+	
 			//これから書き込むバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
@@ -1218,17 +1207,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 
 
+			uint32_t numInstance = 0; // 描画すべきインスタンス
 			// WVP等を計算して、Resourceに書き込む。メインループの中で行う
-			for (uint32_t index = 0; index < kNumInstance; ++index) {
+			for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
+				if (particles[index].lifeTime <= particles[index].currentTime) {
+					continue;
+				}
+				// ...WorldMatrixを求めたり
+				float alpha = 1.0f - (particles[index].currentTime / particles[index].lifeTime);
 				Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 				particles[index].transform.translate += particles[index].velocity * kDeltaTime;
+				particles[index].currentTime += kDeltaTime;
 				instancingData[index].WVP = worldViewProjectionMatrix;
 				instancingData[index].World = worldMatrix;
-
-
-
+				instancingData[index].color = particles[index].color;
+				instancingData[index].color.w = alpha;
+				++numInstance;
 			}
+
 
 #pragma region TransitionBarrierの設定
 			//TransitionBarrierの設定
@@ -1285,16 +1282,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-
-
-
-
-
-
 			//描画！（DrawCall/ドローコール）
 			//commandList->DrawInstanced(6, 1, 0, 0);
 			//描画！6頂点の板ポリゴンを、kNumInstance（今回は10）だけInstance描画を行う
-			commandList->DrawInstanced(UINT(modelData.vertices.size()), 10, 0, 0);
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), numInstance, 0, 0);
 
 
 			////spriteの描画。変更が必要なものだけ変更する
@@ -1304,7 +1295,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			////TransformationMatrixBufferの場所を設定
 			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
 
 			//ImGuiの内部コマンド生成 
 			ImGui::Render();
