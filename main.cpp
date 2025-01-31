@@ -912,8 +912,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region Textureを読んで転送
 	//Textureを読んで転送する
-	//DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
-	DirectX::ScratchImage mipImages = LoadTexture("resources/circle.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	//DirectX::ScratchImage mipImages = LoadTexture("resources/circle.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CreateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
@@ -1115,8 +1115,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Particle particles[kNumMaxInstance];
 	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 		particles[index] = MakeNewParticle(randomEngine);
-
 		instancingData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+
 		//instancingData[index].color = particles[index].color;
 		particles[index].transform.scale = { 1.0f, 1.0f, 1.0f };
 		particles[index].transform.rotate = { 0.0f, 0.0f, 0.0f };
@@ -1236,10 +1236,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				float alpha = 1.0f - (particles[index].currentTime / particles[index].lifeTime);
 				particles[index].transform.translate += particles[index].velocity * kDeltaTime;
 				particles[index].currentTime += kDeltaTime;
-				instancingData[index].WVP = worldViewProjectionMatrix;
-				instancingData[index].World = worldMatrix;
-				instancingData[index].color = particles[index].color;
-				instancingData[index].color.w = alpha;
+				instancingData[numInstance].WVP = worldViewProjectionMatrix;
+				instancingData[numInstance].World = worldMatrix;
+				instancingData[numInstance].color = particles[index].color;
+				instancingData[numInstance].color.w = alpha;
 				++numInstance;
 			}
 
