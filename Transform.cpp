@@ -144,6 +144,21 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 	return ans;
 }
 
+// ビューポート変換行列
+Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth) {
+	Matrix4x4 ans = { 0 };
+
+	ans.m[0][0] = width / 2;
+	ans.m[1][1] = height / 2 * -1;
+	ans.m[2][2] = maxDepth - minDepth;
+	ans.m[3][0] = left + width / 2;
+	ans.m[3][1] = top + height / 2;
+	ans.m[3][2] = minDepth;
+	ans.m[3][3] = 1;
+
+	return ans;
+};
+
 // 逆行列を計算する関数
 Matrix4x4 Inverse(const Matrix4x4& m)
 {
@@ -237,12 +252,20 @@ Matrix4x4 Inverse(const Matrix4x4& m)
 	return result;
 }
 
-const Vector3 operator*(const Vector3& v, const float f) {
+const Vector3 operator*(const Vector3& v,  float s) {
 	Vector3 result;
-	result.x = v.x * f;
-	result.y = v.y * f;
-	result.z = v.z * f;
+	result.x = v.x * s;
+	result.y = v.y * s;
+	result.z = v.z * s;
 	return result;
+}
+
+Vector3& operator*=(Vector3& v, float s)
+{
+	v.x *= s;
+	v.y *= s;
+	v.z *= s;
+	return v;
 }
 
 Vector3& operator+=(Vector3& v1, const Vector3& v2) {
