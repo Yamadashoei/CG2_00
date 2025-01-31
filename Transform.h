@@ -42,6 +42,6 @@ Matrix4x4 MakeIdentity4x4();
 
 // Vector3の掛け算
 const Vector3 operator*(const Vector3& v, float s);
-Vector3& operator*=(Vector3& v, float s);
+Vector3& operator*=(Vector3& v, const float s);
 
 Vector3& operator+=(Vector3& v1, const Vector3& v2);
