@@ -1112,8 +1112,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 	// Instancing用に最大数分のTransformを用意し、それぞれ位置が少しずつずれるように初期化する
-	Particle particles[kNumMaxInstance];
+	//Particle particles[kNumMaxInstance];
+	std::list<Particle> particles;
+
+	particles.push_back= (MakeNewParticle(randomEngine));
+	particles.push_back = (MakeNewParticle(randomEngine));
+	particles.push_back = (MakeNewParticle(randomEngine));
+
+	for (std::list<Particle>::iterator particleIterator = particles.begin(); particleIterator != particles.end();) {
+		//諸々の処理
+		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+			continue;
+		}
+		++particleIterator;
+
+	}
+
 	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
+
 		particles[index] = MakeNewParticle(randomEngine);
 		instancingData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -1188,8 +1204,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::DragFloat3("Scale", &particles[0].transform.scale.x, 0.01f);
 				ImGui::DragFloat3("Rotate", &particles[0].transform.rotate.x, 0.01f);
 				ImGui::DragFloat3("Translate", &particles[0].transform.translate.x, 0.01f);
-
-
+			}
+			//01_03 p6
+			if (ImGui::Button("Add Particle")) {
+				particles.push_back(MakeNewParticle(randomEngine));
+				particles.push_back(MakeNewParticle(randomEngine));
+				particles.push_back(MakeNewParticle(randomEngine));
 			}
 
 			//色変え
@@ -1221,26 +1241,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			uint32_t numInstance = 0; // 描画すべきインスタンス
 			// WVP等を計算して、Resourceに書き込む。メインループの中で行う
-			for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-				if (particles[index].lifeTime <= particles[index].currentTime) {
-					continue;
+			for (std::list<Particle>::iterator particleIterator = particles.begin(); particleIterator != particles.end(); ) {
+
+				if (numInstance < kNumMaxInstance) {
+					if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+						particleIterator = particles.erase(particleIterator); //最初のパーティクルをlistから消す+次のイテレータに
+						continue;//1～3秒立った時消えるようにする
+					}
+
+					//Matrix4x4 scaleMatrix = MakeScaleMatrix(particles[index].transform.scale);
+					//Matrix4x4 translateMatrix = MakeTranslateMatrix(particles[index].transform.translate);
+					//Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
+					//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+					Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);//10<=numInstance
+
+					Matrix4x4 worldMatrixModel = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
+					worldMatrixModel = Multiply(Multiply(MakeScaleMatrix((*particleIterator).transform.scale), billbordMatrix), MakeTranslateMatrix((*particleIterator).transform.translate));
+					Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
+
+					instancingData[numInstance].WVP = WorldViewProjectionMatrixModel;
+					// ...WorldMatrixを求めたり
+					float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+					particles[index].transform.translate += particles[index].velocity * kDeltaTime;
+					particles[index].currentTime += kDeltaTime;
+
+					instancingData[numInstance].World = worldMatrix;
+					instancingData[numInstance].color = particles[index].color;
+					instancingData[numInstance].color.w = alpha;
+
+					instancingData[numInstance].WVP = worldViewProjectionMatrix;
+					++numInstance;
 				}
-
-				Matrix4x4 scaleMatrix = MakeScaleMatrix(particles[index].transform.scale);
-				Matrix4x4 translateMatrix = MakeTranslateMatrix(particles[index].transform.translate);
-				Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
-				//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
-				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
-
-				// ...WorldMatrixを求めたり
-				float alpha = 1.0f - (particles[index].currentTime / particles[index].lifeTime);
-				particles[index].transform.translate += particles[index].velocity * kDeltaTime;
-				particles[index].currentTime += kDeltaTime;
-				instancingData[numInstance].WVP = worldViewProjectionMatrix;
-				instancingData[numInstance].World = worldMatrix;
-				instancingData[numInstance].color = particles[index].color;
-				instancingData[numInstance].color.w = alpha;
-				++numInstance;
+				++particleIterator; //次のパーティクルに進める
 			}
 
 
