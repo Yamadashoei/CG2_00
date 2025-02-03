@@ -73,6 +73,15 @@ struct ParticleForGPU {
 	Vector4 color;
 };
 
+struct Emitter {
+
+	Transform transform; //エミッタのトランスフォーム
+	uint32_t count; //発生数
+	float frequency; //発生頻度
+	float frequencyTime; //頻度用時刻
+
+};
+
 //クライアント領域のサイズ
 const int32_t kClientWidth = 1200;
 const int32_t kClientHeight = 720;
@@ -111,11 +120,21 @@ Particle MakeNewParticle(std::mt19937& randomEngine) {
 	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
 	particle.color = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
 
+	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
+	particle.transform.translate = translate + randomTranslate;
+
 	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
 	particle.lifeTime = distTime(randomEngine);
 	particle.currentTime = 0;
 
 	return particle;
+}
+std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine) {
+	std::list<Particle> particles;
+	for (uint32_t count = 0; count < emitter.count; ++count) {
+		particles.push_back(MakeNewParticle(randomEngine, emitter.transform.translate)); //,emitter.transform.translate
+	}
+	return particles;
 }
 
 
@@ -925,7 +944,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region DepthStencil
 	//DepthStencilTexture関数を使う
-	ID3D12Resource* depthStenceilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
+	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
 	//DSV用のヒープでディスクリプタの数は１
 	ID3D12DescriptorHeap* dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
@@ -934,7 +953,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	//DSVHeapの先頭にDSVを作る
-	device->CreateDepthStencilView(depthStenceilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 #pragma endregion
 
 #pragma region VertexResourceSpriteの生成
@@ -1070,7 +1089,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
 	//使用するリソースのサイズはインデックス６つ分のサイズ
 	indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
-	//インデックスをuint32_tとする
+	//インデックスを uint32_tとする
 	indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
 	//インデックスリソースにデータを書き込む
 	uint32_t* indexDataSprite = nullptr;
@@ -1111,20 +1130,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	device->CreateShaderResourceView(instancingResource, &instancingSrvDesc, instancingSrvHandleCPU);
 #pragma endregion
 
-	// Instancing用に最大数分のTransformを用意し、それぞれ位置が少しずつずれるように初期化する
-	Particle particles[kNumMaxInstance];
-	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-		particles[index] = MakeNewParticle(randomEngine);
-		instancingData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	//Instancing用に最大数分のTransformを用意し、それぞれ位置が少しずつずれるように初期化する
+	//Particle particles[kNumMaxInstance];
+	//for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
+	//	particles[index] = MakeNewParticle(randomEngine);
+	//	instancingData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	//	//instancingData[index].color = particles[index].color;
+	//	particles[index].transform.scale = { 1.0f, 1.0f, 1.0f };
+	//	particles[index].transform.rotate = { 0.0f, 0.0f, 0.0f };
+	//	particles[index].transform.translate = { index * 0.1f, index * 0.1f, index * 0.1f };
+	//	//particles[index].velocity = { 0.0f,1.0f,0.0f };
+	//}
 
-		//instancingData[index].color = particles[index].color;
-		particles[index].transform.scale = { 1.0f, 1.0f, 1.0f };
-		particles[index].transform.rotate = { 0.0f, 0.0f, 0.0f };
-		particles[index].transform.translate = { index * 0.1f, index * 0.1f, index * 0.1f };
-		//particles[index].velocity = { 0.0f,1.0f,0.0f };
-	}
-	// △tを定義。とりあえず60fps固定してあるが、実時間を計算して可変fpsで動かせるようにしておくとなお良い
+	//△tを定義。とりあえず60fps固定してあるが、実時間を計算して可変 fpsで動かせるようにしておくとなお良い
 	const float kDeltaTime = 1.0f / 60.0f;
+
+	//エミッター
+	Emitter emitter{};
+	emitter.count = 3; //3個作る
+	emitter.frequency = 0.5f; //0.5秒毎に発生
+	emitter.frequencyTime = 0.0f; //発生頻度用の時刻、0で初期化
+
+	//パーティクルのリスト化
+	std::list<Particle> particles;
+
+	//for (std::list<Particle>::iterator particleIterator = particles.begin();
+	//	particleIterator != particles.end();) {
+	//	if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+	//		//消すかも
+	//		particleIterator = particles.erase(particleIterator); // 生存時間が過ぎたParticleは listから消す。戻り値が次のイテレータとなる
+	//		continue;
+	//	}
+	//	++particleIterator;
+	//}
 
 
 #pragma region ImGuiの初期化
@@ -1184,10 +1222,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
 
-			if (ImGui::TreeNode("Particle")) {
+			/*if (ImGui::TreeNode("Particle")) {
 				ImGui::DragFloat3("Scale", &particles[0].transform.scale.x, 0.01f);
 				ImGui::DragFloat3("Rotate", &particles[0].transform.rotate.x, 0.01f);
 				ImGui::DragFloat3("Translate", &particles[0].transform.translate.x, 0.01f);
+			}*/
+
+			if (ImGui::Button("Add Particle")) {
+
+				particles.splice(particles.end(), Emit(emitter, randomEngine));
 
 
 			}
@@ -1220,27 +1263,51 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			billboardMatrix.m[3][2] = 0.0f;
 
 			uint32_t numInstance = 0; // 描画すべきインスタンス
-			// WVP等を計算して、Resourceに書き込む。メインループの中で行う
-			for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
+
+
+			emitter.frequencyTime += kDeltaTime; //時刻を進める
+			if (emitter.frequency <= emitter.frequencyTime) { //頻度より大きいなら発生
+
+				particles.splice(particles.end(), Emit(emitter, randomEngine)); //発生処理
+				emitter.frequencyTime -= emitter.frequency; //余計に過ぎた時間も加味して頻度計算する
+
+			}
+
+
+
+
+			/*for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 				if (particles[index].lifeTime <= particles[index].currentTime) {
 					continue;
-				}
+				}*/
 
-				Matrix4x4 scaleMatrix = MakeScaleMatrix(particles[index].transform.scale);
-				Matrix4x4 translateMatrix = MakeTranslateMatrix(particles[index].transform.translate);
+				// WVP等を計算して、Resourceに書き込む。メインループの中で行う
+			for (std::list<Particle>::iterator particleIterator = particles.begin();
+				particleIterator != particles.end();) {
+				if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+					//消すかも
+					particleIterator = particles.erase(particleIterator); // 生存時間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
+					continue;
+				}
+				Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
+				Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
 				Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
 				//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
 				// ...WorldMatrixを求めたり
-				float alpha = 1.0f - (particles[index].currentTime / particles[index].lifeTime);
-				particles[index].transform.translate += particles[index].velocity * kDeltaTime;
-				particles[index].currentTime += kDeltaTime;
-				instancingData[numInstance].WVP = worldViewProjectionMatrix;
-				instancingData[numInstance].World = worldMatrix;
-				instancingData[numInstance].color = particles[index].color;
-				instancingData[numInstance].color.w = alpha;
-				++numInstance;
+				float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+				(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
+				(*particleIterator).currentTime += kDeltaTime;
+
+				if (numInstance < kNumMaxInstance) {
+					instancingData[numInstance].World = worldMatrix;
+					instancingData[numInstance].color = (*particleIterator).color;
+					instancingData[numInstance].color.w = alpha;
+					instancingData[numInstance].WVP = worldViewProjectionMatrix; //10<=numInstance||numInstnace<0はバッファオーバーラン
+					++numInstance;
+				}
+				++particleIterator;
 			}
 
 
@@ -1359,7 +1426,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #ifdef _DEBUG
 	//解放処理
-// シェーダー関連のリソース
+	// シェーダー関連のリソース
 	vertexShaderBlob->Release(); // 頂点シェーダーのバイナリデータ
 	pixelShaderBlob->Release();  // ピクセルシェーダーのバイナリデータ
 	signatureBlob->Release();    // ルートシグネチャのバイナリデータ
