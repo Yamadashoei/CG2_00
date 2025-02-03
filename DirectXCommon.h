@@ -48,6 +48,8 @@ public:
 	//ImGuiの初期化
 	void ImGui();
 
+	void Finalize();
+
 	//SRVの指定番号のCPUデスクリプタハンドルを取得する
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
 	//SRVの指定番号のGPUデスクリプタハンドルを取得する
@@ -81,6 +83,7 @@ public:
 	//getter
 	ID3D12Device* GetDevice()const { return device; } //.Get()
 	ID3D12GraphicsCommandList* GetCommandList() const { return commandList; } //.Get()
+	
 
 private:
 
