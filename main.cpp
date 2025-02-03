@@ -693,7 +693,7 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 
 #pragma region InputLayout
 	//InputLayoutの設定 
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -702,6 +702,10 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	inputElementDescs[1].SemanticIndex = 0;
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs[2].SemanticName = "NORMAL";
+	inputElementDescs[2].SemanticIndex = 0;
+	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
@@ -776,6 +780,7 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 
 	DirectX::ScratchImage mipImages2 = DirectXCommon::LoadTexture(modelData.material.textureFilePath);
 
+	//6頂点までしか確保できない　エラー
 #pragma region VertexResourceの生成
 	//実際に頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = dxCommon->CreateBufferResource(dxCommon->GetDevice(), sizeof(VertexData) * modelData.vertices.size());
@@ -796,6 +801,21 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+
+	////一枚目の四角形
+	////左下
+	//vertexData[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
+	//vertexData[0].texcoord = { 0.0f, 1.0f };
+	////左上
+	//vertexData[1].position = { 0.0f, 0.0f, 0.0f,1.0f };
+	//vertexData[1].texcoord = { 0.0f, 0.0f };
+	////右下
+	//vertexData[2].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	//vertexData[2].texcoord = { 1.0f, 1.0f };
+	////右上
+	//vertexData[3].position = { 640.0f, 0.0f, 0.0f, 1.0f };
+	//vertexData[3].texcoord = { 1.0f, 0.0f };
+
 #pragma endregion
 
 #pragma region 頂点リソース //まだ書いてない
@@ -840,7 +860,7 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	//リソースの先頭アドレスから使う
 	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
 	//リソースサイズは頂点３つ分
-	vertexBufferViewSprite.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+	vertexBufferViewSprite.SizeInBytes = UINT(sizeof(VertexData) * 6);
 	//1頂点あたりのサイズ
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
 #pragma endregion
@@ -863,6 +883,28 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	//右上
 	vertexDataSprite[3].position = { 640.0f, 0.0f, 0.0f, 1.0f };
 	vertexDataSprite[3].texcoord = { 1.0f, 0.0f };
+
+	////左上
+	//vertexDataSprite[0].position = { 0.0f, 0.0f, 0.0f,1.0f };
+	//vertexDataSprite[0].texcoord = { 0.0f, 0.0f };
+	////右上
+	//vertexDataSprite[1].position = { 640.0f, 0.0f, 0.0f, 1.0f };
+	//vertexDataSprite[1].texcoord = { 1.0f, 0.0f };
+	////左下
+	//vertexDataSprite[2].position = { 0.0f, 360.0f, 0.0f, 1.0f };
+	//vertexDataSprite[2].texcoord = { 0.0f, 1.0f };
+
+	////右下 // 左下
+	//vertexDataSprite[3].position = vertexDataSprite[2].position;
+	//vertexDataSprite[3].texcoord = vertexDataSprite[2].texcoord;
+
+	////右上
+	//vertexDataSprite[4].position = vertexDataSprite[1].position;
+	//vertexDataSprite[4].texcoord = vertexDataSprite[1].texcoord;
+
+	////右下
+	//vertexDataSprite[5].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	//vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
 
 #pragma endregion
 
@@ -1049,13 +1091,13 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 			////これから書き込むバックバッファのインデックスを取得
 			//backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
-			dxCommon->PreDraw();
 
 			transform.rotate.y += 0.03f;
 			worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate); *wvpData = worldMatrix;
 			worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			viewMatrixSprite = MakeIdentity4x4();
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
+
 			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite)); *transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 
 			////コメ解除
@@ -1110,6 +1152,7 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 			//commandList->RSSetScissorRects(1, &scissorRect); //scissorを設定
 			//#pragma endregion
 
+			dxCommon->PreDraw();
 			//RootSignatureを設定。PS0に設定しているけど別途設定が必要
 			dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 			// PSOを設定
