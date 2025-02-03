@@ -2,6 +2,8 @@
 #include <windows.h>
 #include <cstdint>
 
+#pragma comment(lib, "winmm.lib")
+
 class WinApp
 {
 public://静的メンバ変数

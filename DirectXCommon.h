@@ -12,6 +12,8 @@
 #include <dxcapi.h>
 #include "externals/DirectXTex/DirectXTex.h"
 
+#include <chrono>
+#include <thread>
 
 class DirectXCommon
 {
@@ -83,7 +85,7 @@ public:
 	//getter
 	ID3D12Device* GetDevice()const { return device; } //.Get()
 	ID3D12GraphicsCommandList* GetCommandList() const { return commandList; } //.Get()
-	
+
 
 private:
 
@@ -146,6 +148,17 @@ private:
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	//TransitionBarrierの設定
 	D3D12_RESOURCE_BARRIER barrier{};
+
+
+	// FPS固定初期化
+	void InitializeFixFPS();
+	// FPS固定更新
+	void UpdateFixFPS();
+
+	// 起動時間(FPS固定用)
+	std::chrono::steady_clock::time_point reference_;
+
+
 
 
 

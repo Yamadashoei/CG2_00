@@ -27,7 +27,11 @@ LRESULT WinApp:: WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 void WinApp::Initialize()
 {
-	//COMの初期化 03_00 p12
+
+// システムタイマーの分解能を上げる
+	timeBeginPeriod(1);
+
+	//COMの初期化
 	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
 	//WNDCLASS wc{};//ウィンドウクラスの設定

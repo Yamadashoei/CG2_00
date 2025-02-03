@@ -1082,7 +1082,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //			//遷移後ResourceState
 //			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 //			//TransitionBarrierを張る
-//			commandList->ResourceBarrier(1, &barrier);
+//			
+// 
+// 
+// 
+// 
+// 
+// ->ResourceBarrier(1, &barrier);
 //#pragma endregion
 
 //#pragma region 描画先のRTVとDSVを設定する
@@ -1162,6 +1168,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			////GPUにコマンドリストの実行を行わせる
 			//ID3D12CommandList* commandLists[] = { commandList };
 			//commandQueue->ExecuteCommandLists(1, commandLists);
+			
 			////GPUとOSに画面の交換を行うように通知する
 			//swapChain->Present(1, 0);
 
