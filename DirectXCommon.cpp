@@ -113,7 +113,7 @@ ID3D12Resource* DirectXCommon::CreateDepthStencilTextureResource(ID3D12Device* d
 		&resourceDesc, //Resourceの設定
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, //データ転送される設定
 		&depthClearValue, //Clear最適値
-		IID_PPV_ARGS(&resource)); //作成するResorceポインタへのポインタ
+		IID_PPV_ARGS(&resource)); //作成するResource ポインタへのポインタ
 	assert(SUCCEEDED(hr));
 
 	return resource;
@@ -619,7 +619,7 @@ void DirectXCommon::PreDraw()
 #pragma endregion
 
 	//指定した深度で画面全体をクリアする
-	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr); //nullpyr
 	//指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; //青っぽい色。RGBAの順
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
@@ -631,6 +631,8 @@ void DirectXCommon::PreDraw()
 	//DSVを設定
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
+	//指定した深度で画面全体をクリアする 
+	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	//コマンドを積む
 	commandList->RSSetViewports(1, &viewport); //Viewportを設定
