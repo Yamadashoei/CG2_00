@@ -108,8 +108,7 @@ Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformS
 
 Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 
-
-Particle MakeNewParticle(std::mt19937& randomEngine) {
+Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	Particle particle;
 	particle.transform.scale = { 0.1f, 0.1f, 0.1f };
@@ -121,7 +120,10 @@ Particle MakeNewParticle(std::mt19937& randomEngine) {
 	particle.color = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
 
 	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
-	particle.transform.translate = translate + randomTranslate;
+	//particle.transform.translate = translate + randomTranslate; //演算子エラー出る
+	particle.transform.translate.x = translate.x + randomTranslate.x;
+	particle.transform.translate.y = translate.y + randomTranslate.y;
+	particle.transform.translate.z = translate.z + randomTranslate.z;
 
 	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
 	particle.lifeTime = distTime(randomEngine);
@@ -129,6 +131,7 @@ Particle MakeNewParticle(std::mt19937& randomEngine) {
 
 	return particle;
 }
+
 std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine) {
 	std::list<Particle> particles;
 	for (uint32_t count = 0; count < emitter.count; ++count) {
@@ -1151,8 +1154,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	emitter.frequency = 0.5f; //0.5秒毎に発生
 	emitter.frequencyTime = 0.0f; //発生頻度用の時刻、0で初期化
 
+	emitter.transform.translate = { 0.0f,0.0f,0.0f };
+	emitter.transform.rotate = { 0.0f,0.0f,0.0f };
+	emitter.transform.scale = { 1.0f,1.0f,1.0f };
+
 	//パーティクルのリスト化
 	std::list<Particle> particles;
+
+	bool isBorn = false;
+	if (isBorn) { // 敵に当たった、攻撃したの判定を入れる
+		//particles.push_back(MakeNewParticle(randomEngine));
+		//particles.push_back(MakeNewParticle(randomEngine));
+		//particles.push_back(MakeNewParticle(randomEngine));
+		particles.splice(particles.end(), Emit(emitter, randomEngine));
+	}
 
 	//for (std::list<Particle>::iterator particleIterator = particles.begin();
 	//	particleIterator != particles.end();) {
@@ -1229,11 +1244,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}*/
 
 			if (ImGui::Button("Add Particle")) {
-
 				particles.splice(particles.end(), Emit(emitter, randomEngine));
-
-
 			}
+			//エミッター(秒数パーティクル)
+			ImGui::DragFloat3("EmitterTranslate", &emitter.transform.translate.x, 0.01f, -100.0f, 100.0f);
 
 			//色変え
 			ImGui::ColorEdit3("color", &materialData->x);
@@ -1265,49 +1279,48 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			uint32_t numInstance = 0; // 描画すべきインスタンス
 
 
-			emitter.frequencyTime += kDeltaTime; //時刻を進める
-			if (emitter.frequency <= emitter.frequencyTime) { //頻度より大きいなら発生
-
-				particles.splice(particles.end(), Emit(emitter, randomEngine)); //発生処理
-				emitter.frequencyTime -= emitter.frequency; //余計に過ぎた時間も加味して頻度計算する
-
-			}
-
-
-
-
-			/*for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-				if (particles[index].lifeTime <= particles[index].currentTime) {
-					continue;
-				}*/
-
-				// WVP等を計算して、Resourceに書き込む。メインループの中で行う
+			// WVP等を計算して、Resourceに書き込む。メインループの中で行う
 			for (std::list<Particle>::iterator particleIterator = particles.begin();
 				particleIterator != particles.end();) {
-				if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
-					//消すかも
-					particleIterator = particles.erase(particleIterator); // 生存時間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
-					continue;
-				}
-				Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
-				Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
-				Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
-				//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
-				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
-				// ...WorldMatrixを求めたり
-				float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-				(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
-				(*particleIterator).currentTime += kDeltaTime;
+				if (numInstance < kNumMaxInstance) { //変更
 
-				if (numInstance < kNumMaxInstance) {
+					if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+						//消すかも
+						particleIterator = particles.erase(particleIterator); // 生存時間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
+						continue;
+					}
+
+					Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
+					Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
+					Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
+					//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+					Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+
+					// ...WorldMatrixを求めたり
+					float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+
+					//(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
+					(*particleIterator).transform.translate.x += (*particleIterator).velocity.x * kDeltaTime;
+					(*particleIterator).transform.translate.y += (*particleIterator).velocity.y * kDeltaTime;
+					(*particleIterator).transform.translate.z += (*particleIterator).velocity.z * kDeltaTime;
+
+					(*particleIterator).currentTime += kDeltaTime;
 					instancingData[numInstance].World = worldMatrix;
 					instancingData[numInstance].color = (*particleIterator).color;
 					instancingData[numInstance].color.w = alpha;
 					instancingData[numInstance].WVP = worldViewProjectionMatrix; //10<=numInstance||numInstnace<0はバッファオーバーラン
 					++numInstance;
+
 				}
 				++particleIterator;
+			}
+
+			emitter.frequencyTime += kDeltaTime; //時刻を進める
+			if (emitter.frequency <= emitter.frequencyTime) { //頻度より大きいなら発生
+				particles.splice(particles.end(), Emit(emitter, randomEngine)); //発生処理
+				emitter.frequencyTime -= emitter.frequency; //余計に過ぎた時間も加味して頻度計算する
+
 			}
 
 
