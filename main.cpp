@@ -816,6 +816,7 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	//vertexData[3].position = { 640.0f, 0.0f, 0.0f, 1.0f };
 	//vertexData[3].texcoord = { 1.0f, 0.0f };
 
+
 #pragma endregion
 
 #pragma region 頂点リソース //まだ書いてない
