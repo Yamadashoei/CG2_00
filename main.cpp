@@ -1119,7 +1119,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//instancingData[index].color = particles[index].color;
 		particles[index].transform.scale = { 1.0f, 1.0f, 1.0f };
-		particles[index].transform.rotate = { 0.0f, 0.0f, 0.0f };
+		particles[index].transform.rotate = { 0.0f, 3.14f, 0.0f }; //Y軸0.0f変更
 		particles[index].transform.translate = { index * 0.1f, index * 0.1f, index * 0.1f };
 		//particles[index].velocity = { 0.0f,1.0f,0.0f };
 	}
@@ -1228,7 +1228,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 				Matrix4x4 scaleMatrix = MakeScaleMatrix(particles[index].transform.scale);
 				Matrix4x4 translateMatrix = MakeTranslateMatrix(particles[index].transform.translate);
-				Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
+				
+				//追加
+				Matrix4x4 rotateMatrix = MakeRotateZMatrix(particles[index].transform.rotate.y);
+				Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * rotateMatrix * translateMatrix;
+				//Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix; //変更
+				
 				//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
