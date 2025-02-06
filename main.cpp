@@ -606,7 +606,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	assert(SUCCEEDED(hr));//assert(fenceEvent != nullptr);
 	//
 		//dxcCompilerを初期化
-Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	IDxcCompiler3* dxcCompiler = nullptr;
 	HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
 	assert(SUCCEEDED(hr));
@@ -774,6 +774,8 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	hr = dxCommon->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
 	assert(SUCCEEDED(hr));
 #pragma endregion
+
+	//DirectXに移植をするかも
 
 	//モデルデータ読み込み
 	ModelData modelData = LoadObjFile("resources", "plane.obj");
@@ -1033,23 +1035,23 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	//		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	//#pragma endregion
 
-	//頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
-	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;//UploadHeapを使う
-	//頂点リソースの設定
-	D3D12_RESOURCE_DESC vertexResourceDesc{};
-	//バッファリソース。テクスチャの場合はまた別の設定をする
-	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	vertexResourceDesc.Width = sizeof(VertexData) * 6;// リソースのサイズ。今回はVector4を3頂点分
-	//バッファの場合はこれらは1にする決まり
-	vertexResourceDesc.Height = 1;
-	vertexResourceDesc.DepthOrArraySize = 1;
-	vertexResourceDesc.MipLevels = 1;
-	vertexResourceDesc.SampleDesc.Count = 1;
-	//バッファの場合はこれにする決まり
-	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	hr = dxCommon->GetDevice()->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
-	assert(SUCCEEDED(hr));
+	////頂点リソース用のヒープの設定
+	//D3D12_HEAP_PROPERTIES uploadHeapProperties{};
+	//uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;//UploadHeapを使う
+	////頂点リソースの設定
+	//D3D12_RESOURCE_DESC vertexResourceDesc{};
+	////バッファリソース。テクスチャの場合はまた別の設定をする
+	//vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	//vertexResourceDesc.Width = sizeof(VertexData) * 6;// リソースのサイズ。今回はVector4を3頂点分
+	////バッファの場合はこれらは1にする決まり
+	//vertexResourceDesc.Height = 1;
+	//vertexResourceDesc.DepthOrArraySize = 1;
+	//vertexResourceDesc.MipLevels = 1;
+	//vertexResourceDesc.SampleDesc.Count = 1;
+	////バッファの場合はこれにする決まり
+	//vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	//hr = dxCommon->GetDevice()->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
+	//assert(SUCCEEDED(hr));
 
 
 	MSG msg{};
@@ -1066,6 +1068,7 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 			//ゲームの処理↓
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
+
 			ImGui::NewFrame();
 			//開発用のUIの処理
 
@@ -1125,11 +1128,6 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 //			//遷移後ResourceState
 //			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 //			//TransitionBarrierを張る
-//			
-// 
-// 
-// 
-// 
 // 
 // ->ResourceBarrier(1, &barrier);
 //#pragma endregion
@@ -1285,7 +1283,8 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 
 #endif
 
-
+	  // dxCommonの終了処理
+	dxCommon->Finalize();
 	delete input;
 	//WindowsAPIの終了処理
 	winApp->Finalize();
@@ -1294,6 +1293,7 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	//DirectX解放
 	delete dxCommon;
 
+	//delete Finalize;
 
 	//リソースリークチェック
 	//d3dResourceLeakChecker->~D3DResourceLeakChecker();
@@ -1306,10 +1306,10 @@ Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	//	debug->Release();
 	//}
 
-	//ImGui終了処理 
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
+	////ImGui終了処理 
+	//ImGui_ImplDX12_Shutdown();
+	//ImGui_ImplWin32_Shutdown();
+	//ImGui::DestroyContext();
 
 	/*CloseHandle(fenceEvent);
 	CloseWindow(hwnd);*/

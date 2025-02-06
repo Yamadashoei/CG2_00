@@ -76,7 +76,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> DirectXCommon::CompileShader(
 	return shaderBlob;
 }
 
-ComPtr<ID3D12DescriptorHeap> DirectXCommon::CreateDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12Device> device,D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
+ComPtr<ID3D12DescriptorHeap> DirectXCommon::CreateDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12Device> device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
 {//ディスクリプタヒープの生成 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
@@ -124,7 +124,7 @@ ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureResource(Microsof
 
 }
 
-ComPtr <ID3D12Resource>  DirectXCommon::CreateBufferResource(ComPtr<ID3D12Device> device,size_t sizeInBytes)
+ComPtr <ID3D12Resource>  DirectXCommon::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeInBytes)
 {
 	//頂点リソース用のヒープの設定
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
@@ -149,7 +149,7 @@ ComPtr <ID3D12Resource>  DirectXCommon::CreateBufferResource(ComPtr<ID3D12Device
 	return resource;
 }
 
-ComPtr<ID3D12Resource>  DirectXCommon::CreateTextureResource(ComPtr<ID3D12Device> device,const DirectX::TexMetadata& metadata)
+ComPtr<ID3D12Resource>  DirectXCommon::CreateTextureResource(ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata)
 {
 	//metadataを基にResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -599,6 +599,12 @@ void DirectXCommon::Finalize()
 	////debugController->Release();         // DirectXデバッグコントローラー
 
 	CloseHandle(fenceEvent);
+	//ImGui終了処理 
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
+
 
 }
 
