@@ -82,6 +82,24 @@ struct Emitter {
 
 };
 
+struct AABB {
+	Vector3 min;
+	Vector3 max;
+};
+struct AccelerationField {
+	Vector3 acceleration;
+	AABB area;
+};
+
+bool IsCollision(const AABB& aabb, const Vector3& point) {
+	if ((aabb.min.x <= point.x && aabb.max.x >= point.x) &&
+		(aabb.min.y <= point.y && aabb.max.y >= point.y) &&
+		(aabb.min.z <= point.z && aabb.max.z >= point.z)) {
+		return true;
+	}
+	return false;
+}
+
 //クライアント領域のサイズ
 const int32_t kClientWidth = 1200;
 const int32_t kClientHeight = 720;
@@ -1169,6 +1187,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		particles.splice(particles.end(), Emit(emitter, randomEngine));
 	}
 
+	bool isAccelerationField = false;
+	AccelerationField accelerationField;
+	accelerationField.acceleration = { 15.0f, 0.0f, 0.0f };
+	accelerationField.area.min = { -1.0f, -1.0f, -1.0f };
+	accelerationField.area.max = { 1.0f, 1.0f, 1.0f };
+
 	//for (std::list<Particle>::iterator particleIterator = particles.begin();
 	//	particleIterator != particles.end();) {
 	//	if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
@@ -1248,6 +1272,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 			//エミッター(秒数パーティクル)
 			ImGui::DragFloat3("EmitterTranslate", &emitter.transform.translate.x, 0.01f, -100.0f, 100.0f);
+			//風
+			ImGui::Checkbox("accelerationField", &isAccelerationField);
 
 			//色変え
 			ImGui::ColorEdit3("color", &materialData->x);
@@ -1289,6 +1315,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 						//消すかも
 						particleIterator = particles.erase(particleIterator); // 生存時間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
 						continue;
+					}
+
+					// Fieldの範囲内のParticleには加速度を適用する
+					if (isAccelerationField) {
+						if (IsCollision(accelerationField.area, (*particleIterator).transform.translate)) {
+							(*particleIterator).velocity += accelerationField.acceleration * kDeltaTime;
+						}
 					}
 
 					Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
