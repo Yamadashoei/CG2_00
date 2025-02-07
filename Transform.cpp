@@ -25,16 +25,6 @@ Matrix4x4 Multiply(Matrix4x4 matrix1, Matrix4x4 matrix2) {
 	return result;
 }
 
-Matrix3x3 MakeRotateMatrix3x3(float radian) {
-	Matrix3x3 ans = { 0 };
-	ans.m[0][0] = std::cos(radian);
-	ans.m[0][1] = std::sin(radian);
-	ans.m[1][0] = -std::sin(radian);
-	ans.m[1][1] = -std::cos(radian);
-	ans.m[2][2] = 1;
-	return ans;
-};
-
 // スケール行列を生成する関数
 Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
 	Matrix4x4 ans = { 0 };

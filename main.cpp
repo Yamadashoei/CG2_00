@@ -1232,7 +1232,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				//追加
 				Matrix4x4 rotateMatrix = MakeRotateZMatrix(particles[index].transform.rotate.y);
 				Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * rotateMatrix * translateMatrix;
-				//Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix; //変更
 				
 				//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);

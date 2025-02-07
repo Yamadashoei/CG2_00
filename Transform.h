@@ -1,7 +1,6 @@
 #pragma once
 #include "Matrix4x4.h"
 #include "Vector3.h"
-#include "Matrix3x3.h"
 
 // 変換用構造体
 // スケール、回転、平行移動をまとめて扱う
@@ -16,8 +15,6 @@ struct Transform {
 Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 // 2つの行列を乗算
 Matrix4x4 Multiply(Matrix4x4 matrix1, Matrix4x4 matrix2);
-// x軸回転行列
-Matrix3x3 MakeRotateMatrix3x3(float radian);
 
 // 平行移動行列を生成
 Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
