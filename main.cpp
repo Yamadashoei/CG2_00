@@ -1155,7 +1155,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	emitter.frequencyTime = 0.0f; //発生頻度用の時刻、0で初期化
 
 	emitter.transform.translate = { 0.0f,0.0f,0.0f };
-	emitter.transform.rotate = { 0.0f,0.0f,0.0f };
+	emitter.transform.rotate = { 0.0f, 3.14f, 0.0f };
 	emitter.transform.scale = { 1.0f,1.0f,1.0f };
 
 	//パーティクルのリスト化
@@ -1293,7 +1293,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 					Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
 					Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
-					Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
+
+					Matrix4x4 rotateMatrix = MakeRotateZMatrix((*particleIterator).transform.rotate.y);
+					Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * rotateMatrix * translateMatrix;
+
+					//Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
 					//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
 					Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
