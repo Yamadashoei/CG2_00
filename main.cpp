@@ -1201,16 +1201,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
 			transform.rotate.y += 0.03f;
-			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate); *wvpData = worldMatrix;
 
 			//WVPMatrix
+			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate); *wvpData = worldMatrix;
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite)); *transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 			Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
-
-
 
 			// CG3_01_02
 			Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
@@ -1228,11 +1226,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 				Matrix4x4 scaleMatrix = MakeScaleMatrix(particles[index].transform.scale);
 				Matrix4x4 translateMatrix = MakeTranslateMatrix(particles[index].transform.translate);
-				
-				//追加
 				Matrix4x4 rotateMatrix = MakeRotateZMatrix(particles[index].transform.rotate.y);
 				Matrix4x4 worldMatrix = scaleMatrix * billboardMatrix * rotateMatrix * translateMatrix;
-				
 				//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
