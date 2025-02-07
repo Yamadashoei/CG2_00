@@ -1278,7 +1278,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//device->Release();                  // DirectXのデバイスオブジェクト
 	//useAdapter->Release();              // 使用するアダプタ（GPU）オブジェクト
 	//dxgiFactory->Release();             // DXGIファクトリー（スワップチェーンやアダプタ作成用）
-	//debugController->Release();         // DirectXデバッグコントローラー
+	//debugController->Release();         // DirectXデバッグコントローラー 
 
 
 #endif
