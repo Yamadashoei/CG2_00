@@ -1211,7 +1211,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 
 			// CG3_01_02
-			Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(0); //なぜかカメラが＋方向にいる:修正必要( camera )
+			Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(0); //なぜかカメラが＋方向にいる:修正必要( camera ) 
 			Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
 			billboardMatrix.m[3][0] = 0.0f;
 			billboardMatrix.m[3][1] = 0.0f;
