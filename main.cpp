@@ -112,7 +112,7 @@ Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	Particle particle;
 	particle.transform.scale = { 0.1f, 0.1f, 0.1f };
-	particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
+	particle.transform.rotate = { 0.0f, 3.14f, 0.0f };
 	particle.transform.translate = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
 	particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
 
@@ -1155,7 +1155,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	emitter.frequencyTime = 0.0f; //発生頻度用の時刻、0で初期化
 
 	emitter.transform.translate = { 0.0f,0.0f,0.0f };
-	emitter.transform.rotate = { 0.0f, 3.14f, 0.0f };
+	emitter.transform.rotate = { 0.0f, 0.0f, 0.0f };
 	emitter.transform.scale = { 1.0f,1.0f,1.0f };
 
 	//パーティクルのリスト化
