@@ -141,10 +141,11 @@ private:
 
 	static const uint32_t MaxResource = 2;
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
+
 	//深度バッファ
-	ID3D12Resource* resource = nullptr;
+	//ID3D12Resource* resource = nullptr;
 	//デスクリプタヒープ
-	ID3D12DescriptorHeap* descriptorHeap = nullptr;
+	//ID3D12DescriptorHeap* descriptorHeap = nullptr;
 
 	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
 	uint32_t descriptorSizeSRV = 0;
