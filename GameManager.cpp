@@ -22,13 +22,12 @@ int GameManager::Run() {
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	while (Input::ProcessMessage() == 0) {
-
+	while (true) {
 		// 
 		memcpy(preKeys, keys, 256);
-		DirectXCommon::GetHitKeyStateAll(keys);
+		Input::GetHitKeyStateAll(keys);
 
-		DirectXCommon::BeginFrame();
+		Input::BeginFrame();
 
 		prevSceneNum_ = currentSceneNum_;
 		currentSceneNum_ = sceneArr_[currentSceneNum_]->GetScene();
