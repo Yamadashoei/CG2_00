@@ -77,6 +77,7 @@ void WinApp::Update()
 void WinApp::Finalize()
 {
 	CloseWindow(hwnd);
+	//COMの初期化終了
 	CoUninitialize();
 
 
