@@ -29,6 +29,9 @@
 #include "DirectXCommon.h"
 #include "D3DResourceLeakChecker.h"
 
+#include "SpriteCommon.h"
+#include "Sprite.h"
+
 using namespace Logger;
 using namespace StringUtility;
 
@@ -200,25 +203,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// D3D12ResourceChecker
 	D3DResourceLeakChecker d3dResourceLeakChecker;
 
-	//ポインタ
+#pragma region 基盤システムの初期化
+
 	WinApp* winApp = nullptr;
 	//WindowsAPIの初期化
 	winApp = new WinApp();
 	winApp->Initialize();
 
-	//ポインタ
 	DirectXCommon* dxCommon = nullptr;
 	//DirectX初期化
 	dxCommon = new DirectXCommon();
 	dxCommon->Initialize(winApp);
 
-	//ポインタ
 	Input* input = nullptr;
 	//入力の初期化
 	input = new Input();
 	input->Initialize(winApp);
 
-#pragma endregion
+	SpriteCommon* spriteCommon = nullptr;
+	//スプライト共有部の初期化
+	spriteCommon = new SpriteCommon;
+	spriteCommon->Initialize();
+
+#pragma endregion 
 
 #pragma region RootSignature作成
 	//RootSignature作成
@@ -366,11 +373,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 #pragma endregion
 
-	//DirectXに移植をするかも
+
+#pragma region 最初のシーンの初期化
+	//スプライトの初期化
+	Sprite* sprite = new Sprite();
+	sprite->Initialize();
+#pragma endregion
+
 
 	//モデルデータ読み込み
 	ModelData modelData = LoadObjFile("resources", "plane.obj");
-
 	DirectX::ScratchImage mipImages2 = DirectXCommon::LoadTexture(modelData.material.textureFilePath);
 
 	//6頂点までしか確保できない　エラー
@@ -663,6 +675,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete winApp;
 	//DirectX解放
 	delete dxCommon;
+	//スプライトの共有部の解放
+	delete spriteCommon;
+	//スプライトの解放
+	delete sprite;
 
 	return 0;
 }
