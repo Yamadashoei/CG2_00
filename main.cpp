@@ -193,7 +193,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	return modelData;
 }
 
-//PG3_評価課題で追加
+//PG3_01_03を評価課題で追加
 // コールバック関数のプロトタイプ宣言
 typedef void (*Callback)(int result);
 
