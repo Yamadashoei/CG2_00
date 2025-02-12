@@ -200,7 +200,7 @@ typedef void (*Callback)(int result);
 // 判定を行うコールバック関数
 void Vertical_rotation(int result) {
 
-	transform.rotate.x += 0.05f;
+	transform.rotate.z += 0.05f;
 }
 
 
