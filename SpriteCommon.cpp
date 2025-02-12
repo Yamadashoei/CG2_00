@@ -3,3 +3,11 @@
 void SpriteCommon::Initialize()
 {
 }
+
+void SpriteCommon::RootSignature()
+{
+}
+
+void SpriteCommon::GraphicsPipeline()
+{
+}
