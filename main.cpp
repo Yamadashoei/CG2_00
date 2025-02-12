@@ -193,6 +193,16 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	return modelData;
 }
 
+//PG3_評価課題で追加
+// コールバック関数のプロトタイプ宣言
+typedef void (*Callback)(int result);
+
+// 判定を行うコールバック関数
+void Vertical_rotation(int result) {
+
+	transform.rotate.x += 0.05f;
+}
+
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -586,6 +596,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
 
 			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite)); *transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
+
+			Callback callback = Vertical_rotation;
+
+			callback(0);
 
 			////コメ解除
 			//Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
