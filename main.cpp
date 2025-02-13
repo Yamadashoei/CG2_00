@@ -223,7 +223,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SpriteCommon* spriteCommon = nullptr;
 	//スプライト共有部の初期化
 	spriteCommon = new SpriteCommon;
-	spriteCommon->Initialize();
+	spriteCommon->Initialize(dxCommon);
 
 #pragma endregion 
 
@@ -610,6 +610,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//}
 
 			dxCommon->PreDraw();
+
+			//スプライト
+			spriteCommon->Settings();
+
 			//RootSignatureを設定。PS0に設定しているけど別途設定が必要
 			dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 			// PSOを設定

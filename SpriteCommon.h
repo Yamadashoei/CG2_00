@@ -5,6 +5,10 @@ class SpriteCommon
 {
 public: //メンバ関数
 	void Initialize(DirectXCommon* dxCommon); //初期化
+	DirectXCommon* GetDirectXCommon()const { return dxCommon_; }
+
+	//共通描画設定
+	void Settings();
 
 private:
 	//PSO
@@ -13,8 +17,10 @@ private:
 
 	DirectXCommon* dxCommon_;
 
-
-//PSO
+	//バイナリを元に生成
+	//ルートシグネチャ
+	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature = nullptr;
+	//PSO
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
 
 };
