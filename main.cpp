@@ -32,16 +32,12 @@
 #include "SpriteCommon.h"
 #include "Sprite.h"
 
+#include "kMath.h"
+using namespace kMath;
+
 using namespace Logger;
 using namespace StringUtility;
 
-struct Vector4 {
-	float x, y, z, w;
-};
-
-struct Vector2 {
-	float x, y;
-};
 
 struct VertexData
 {

@@ -27,9 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="externals\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -69,14 +66,17 @@
     <ClCompile Include="DirectXCommon.cpp">
       <Filter>自作クラス</Filter>
     </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>mathファイル</Filter>
-    </ClCompile>
     <ClCompile Include="SpriteCommon.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>自作クラス</Filter>
     </ClCompile>
     <ClCompile Include="Sprite.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>自作クラス</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>自作クラス</Filter>
+    </ClCompile>
+    <ClCompile Include="kMath.cpp">
+      <Filter>mathファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -132,10 +132,19 @@
       <Filter>mathファイル</Filter>
     </ClInclude>
     <ClInclude Include="SpriteCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>自作クラス</Filter>
     </ClInclude>
     <ClInclude Include="Sprite.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>自作クラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector4.h">
+      <Filter>mathファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>mathファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="kMath.h">
+      <Filter>mathファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
