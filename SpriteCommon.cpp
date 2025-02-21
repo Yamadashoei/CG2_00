@@ -166,11 +166,11 @@ void SpriteCommon::GraphicsPipeline()
 void SpriteCommon::Settings()
 {
 	//修正
-	//ルートシグネチャをセットするコマンド
+	//ルートシグネチャをセットするコマンド RootSignatureを設定。PS0に設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-	//グラフィックスパイプラインステートをセットするコマンド
+	//グラフィックスパイプラインステートをセットするコマンド PSOを設定
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
-	//プリミティブトポロジーをセットするコマンド
+	//プリミティブトポロジーをセットするコマンド 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 

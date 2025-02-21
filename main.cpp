@@ -64,25 +64,25 @@ struct ModelData {
 const int32_t kClientWidth = 1280;
 const int32_t kClientHeight = 720;
 
-Transform transform{ {0.5f,0.5f,0.5f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-//CPUで動かす用Transformを作る
-Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
+//Transform transform{ {0.5f,0.5f,0.5f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+////CPUで動かす用Transformを作る
+//Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+//Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
 
-Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-
-Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-
-Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-
-Matrix4x4 projectionMatrix = Matrix4x4::MakePerspectiveMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
-
-Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
-
-//Sprite用のWorldViewProjectionMatrixを作る
-Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-
-Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
+//Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+//
+//Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+//
+//Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+//
+//Matrix4x4 projectionMatrix = Matrix4x4::MakePerspectiveMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+//
+//Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+//
+////Sprite用のWorldViewProjectionMatrixを作る
+//Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+//
+//Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 
 //DescriptorHeapの作成関数
 ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible) {
@@ -479,16 +479,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma endregion
 
-#pragma region マテリアル
-	//マテリアル用のリソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource>  materialResource = dxCommon->CreateBufferResource(dxCommon->GetDevice(), sizeof(Vector4));
-	//マテリアルにデータを書き込む
-	Vector4* materialData = nullptr;
-	//書き込むためのアドレスを取得
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	//赤を書き込む
-	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-#pragma endregion
+//#pragma region マテリアル
+//	//マテリアル用のリソースを作る
+//	Microsoft::WRL::ComPtr<ID3D12Resource>  materialResource = dxCommon->CreateBufferResource(dxCommon->GetDevice(), sizeof(Vector4));
+//	//マテリアルにデータを書き込む
+//	Vector4* materialData = nullptr;
+//	//書き込むためのアドレスを取得
+//	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+//	//赤を書き込む
+//	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+//#pragma endregion
 
 #pragma region WVP (VertexBufferView)
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource = dxCommon->CreateBufferResource(dxCommon->GetDevice(), sizeof(Matrix4x4));
@@ -508,16 +508,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma endregion
 
-#pragma region Sprite用のTransformationMatrix
-	//マテリアル用のリソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceSprite = dxCommon->CreateBufferResource(dxCommon->GetDevice(), sizeof(Matrix4x4));
-	//データを書き込む
-	Matrix4x4* transformationMatrixDataSprite = nullptr;
-	//書き込むためのアドレスを取得
-	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
-	//赤を書き込む
-	*transformationMatrixDataSprite = MakeIdentity4x4();
-#pragma endregion
+//#pragma region Sprite用のTransformationMatrix
+//	//マテリアル用のリソースを作る
+//	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceSprite = dxCommon->CreateBufferResource(dxCommon->GetDevice(), sizeof(Matrix4x4));
+//	//データを書き込む
+//	Matrix4x4* transformationMatrixDataSprite = nullptr;
+//	//書き込むためのアドレスを取得
+//	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+//	//赤を書き込む
+//	*transformationMatrixDataSprite = MakeIdentity4x4();
+//#pragma endregion
 
 
 #pragma region Lighting //まだ書いてない
@@ -588,12 +588,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
 			transform.rotate.y += 0.03f;
-			worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate); *wvpData = worldMatrix;
-			worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-			viewMatrixSprite = MakeIdentity4x4();
+			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate); *wvpData = worldMatrix;
+			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
 
-			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite)); *transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
+			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite)); //*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
 
 			////コメ解除
 			//Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
@@ -610,49 +610,50 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//スプライト
 			spriteCommon->Settings();
 
-			//RootSignatureを設定。PS0に設定しているけど別途設定が必要
-			dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-			// PSOを設定
-			dxCommon->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
-			//VBVを設定
-			dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-			//
-			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-			dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			//マテリアルCBufferの場所を設定
-			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+			////RootSignatureを設定。PS0に設定しているけど別途設定が必要
+			//dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+			//// PSOを設定
+			//dxCommon->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+			////VBVを設定
+			//dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+			////
+			////形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
+			//dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			////マテリアルCBufferの場所を設定
+			//dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
-			//wvp用のCBufferの場所を設定
-			// 定数バッファビューを0番目のパラメータで設定
-			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+			////wvp用のCBufferの場所を設定
+			//// 定数バッファビューを0番目のパラメータで設定
 			//dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+			////dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
-			//instancing用のDataを読むためにStructuredBufferのSRVを設定する
-			//dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
-			dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			////instancing用のDataを読むためにStructuredBufferのSRVを設定する
+			////dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
+			//dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
-			//描画！（DrawCall/ドローコール）
-			//dxCommon->GetCommandList()->DrawInstanced(6, 1, 0, 0);
-			//描画！6頂点の板ポリゴンを、kNumInstance（今回は10）だけInstance描画を行う
+			////描画！（DrawCall/ドローコール）
+			////dxCommon->GetCommandList()->DrawInstanced(6, 1, 0, 0);
+			////描画！6頂点の板ポリゴンを、kNumInstance（今回は10）だけInstance描画を行う
 
-			//パーティクル
-			dxCommon->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+			////パーティクル
+			//dxCommon->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 
-			//spriteの描画。変更が必要なものだけ変更する
-			dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
-			//IndexBufferView 
-			dxCommon->GetCommandList()->IASetIndexBuffer(&indexBufferViewSprite);
-			//TransformationMatrixBufferの場所を設定
-			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			dxCommon->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			////spriteの描画。変更が必要なものだけ変更する
+			//dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+			////IndexBufferView 
+			//dxCommon->GetCommandList()->IASetIndexBuffer(&indexBufferViewSprite);
+			////TransformationMatrixBufferの場所を設定
+			//dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			//dxCommon->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
 			//ImGuiの内部コマンド生成 
 			ImGui::Render();
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList().Get());
 
-
+			//spriteDraw
+			sprite->Draw(textureSrvHandleGPU);
 
 			dxCommon->PostDraw();
 

@@ -43,7 +43,7 @@ private:
 	uint32_t* indexData = nullptr;
 	//バッファリソースの使い方を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView; //頂点バッファビュー
-	D3D12_INDEX_BUFFER_VIEW indexBufferView;
+	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite;
 
 	//バッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
@@ -51,7 +51,7 @@ private:
 	Material* materialData = nullptr;
 
 	//バッファリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceSprite;
 	//バッファリソース内のデータを指すポインタ
 	TransformationMatrix* transformationMatrixData = nullptr;
 
