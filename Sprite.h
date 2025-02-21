@@ -30,12 +30,14 @@ public: //メンバ関数
 	void Initialize(SpriteCommon* spriteCommon); //初期化
 	void Update();// 更新
 	void Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);// 描画
+
+
 private:
 	SpriteCommon* spriteCommon_ = nullptr;
 
 	//バッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResourceSprite;
 	//バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 	uint32_t* indexData = nullptr;
@@ -53,26 +55,15 @@ private:
 	//バッファリソース内のデータを指すポインタ
 	TransformationMatrix* transformationMatrixData = nullptr;
 
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU;
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU;
+
 	//データを書き込む
 	Matrix4x4* transformationMatrixDataSprite = nullptr; //スプライト
 
+	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	//// VertexResourceの作成
-	//	void CreateVertexResource();
-	//	// IndexResourceの作成
-	//	void CreateIndexResource();
-	//	// VertexBufferViewの作成
-	//	void CreateVertexbufferView();
-	//	// IndexBufferViewの作成
-	//	void CreateIndexBufferView();
-	//	// MaterialResourceの作成
-	//	void CreateMaterialResource();
-	//	// MaterialResourceにデータを書きこっむためのアドレスを取得してmaterialDataに割り当てる
-	//	void CreateMapMaterialData();
-	//	// TransformationMatrixの作成
-	//	void CreateTransformationMatrix();
-	//	// TransformationMatrixResourceにデータを書き込む溜めのアドレスを取得してTransformationMatrixDataに割り当てる
-	//	void CreateMapTransformationMatrixData();
+	bool IsSprite = true;
 
 
 

@@ -17,13 +17,15 @@ private:
 
 	DirectXCommon* dxCommon_;
 
+	//RootSignature
+	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
+
 	//バイナリを元に生成
-	//ルートシグネチャ
 	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature = nullptr;
 	//PSO
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
 
-	
+
 
 
 

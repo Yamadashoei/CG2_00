@@ -7,7 +7,52 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 	this->spriteCommon_ = spriteCommon;
 
 	//p10やる
+	textureSrvHandleCPU = spriteCommon_->GetDirectXCommon()->GetSRVCPUDescriptorHandle(1);
+	textureSrvHandleGPU = spriteCommon_->GetDirectXCommon()->GetSRVGPUDescriptorHandle(1);
 
+
+	//Sprite
+	vertexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
+
+	//リソースの先頭アドレス
+	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+	//使用するリソースサイズ
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 4;
+	//頂点サイズ
+	vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	//モデル
+	vertexData[0].position = { 0.0f,360.0f,0.0f,1.0f };//0
+	vertexData[0].texcoord = { 0.0f,1.0f };
+	vertexData[1].position = { 0.0f,0.0f,0.0f,1.0f };//1,3
+	vertexData[1].texcoord = { 0.0f,0.0f };
+	vertexData[2].position = { 640.0f,360.0f,0.0f,1.0f };//2,5
+	vertexData[2].texcoord = { 1.0f,1.0f };
+	vertexData[3].position = { 640.0f,0.0f,0.0f,1.0f };//4
+	vertexData[3].texcoord = { 1.0f,0.0f };
+
+
+
+	//Index
+	indexResourceSprite = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
+
+	//リソースの先頭アドレス
+	indexBufferView.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
+	//使用するリソースサイズ
+	indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
+	//頂点サイズ
+	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+	indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
+
+	indexData[0] = 0;
+	indexData[1] = 1;
+	indexData[2] = 2;
+	indexData[3] = 1;
+	indexData[4] = 3;
+	indexData[5] = 2;
 
 
 
