@@ -33,44 +33,35 @@ public: //メンバ関数
 
 
 private:
+	HRESULT hr;
 	SpriteCommon* spriteCommon_ = nullptr;
 
-	//バッファリソース
+	// Sprite用のバッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResourceSprite;
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource; 
+	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource;//transformationMatrixResource
+
 	//バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 	uint32_t* indexData = nullptr;
+
 	//バッファリソースの使い方を補足するバッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView; //頂点バッファビュー
-	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite;
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{}; //頂点バッファビュー
+	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
 
 	//バッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	//マテリアルにデータを書き込む
 	Material* materialData = nullptr;
 
-	//バッファリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceSprite;
 	//バッファリソース内のデータを指すポインタ
 	TransformationMatrix* transformationMatrixData = nullptr;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU;
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU;
+	/*D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU;
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU;*/
 
-	//データを書き込む
-	Matrix4x4* transformationMatrixDataSprite = nullptr; //スプライト
-
-	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-
-	bool IsSprite = true;
-
-
-
-
-
-
-
+	////データを書き込む
+	//Matrix4x4* transformationMatrixDataSprite = nullptr; //スプライト
 
 
 };

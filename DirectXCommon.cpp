@@ -124,7 +124,7 @@ ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureResource(Microsof
 
 }
 
-ComPtr <ID3D12Resource>  DirectXCommon::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeInBytes)
+ComPtr <ID3D12Resource>  DirectXCommon::CreateBufferResource(size_t sizeInBytes)
 {
 	//頂点リソース用のヒープの設定
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};

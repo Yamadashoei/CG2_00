@@ -80,13 +80,13 @@ public:
 	//コンパイルシェーダ
 	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(const std::wstring& filePath, const wchar_t* profile);
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
+	//Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
 	// DirectX12のTextureResourceを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata);
+	//Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata);
 
 	//IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile);//IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
-	//ID3D12Resource* CreateBufferResource(size_t sizeInBytes);
-	//ID3D12Resource* CreateTextureResource(const DirectX::TexMetadata& metadata);
+	ID3D12Resource* CreateBufferResource(size_t sizeInBytes);
+ ID3D12Resource* CreateTextureResource(const DirectX::TexMetadata& metadata);
 
 	void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages);
 	static DirectX::ScratchImage LoadTexture(const std::string& filePath);

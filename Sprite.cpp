@@ -6,13 +6,13 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 {
 	this->spriteCommon_ = spriteCommon;
 
-	//p10やる
-	textureSrvHandleCPU = spriteCommon_->GetDirectXCommon()->GetSRVCPUDescriptorHandle(1);
-	textureSrvHandleGPU = spriteCommon_->GetDirectXCommon()->GetSRVGPUDescriptorHandle(1);
+	////p10やる
+	//textureSrvHandleCPU = spriteCommon_->GetDirectXCommon()->GetSRVCPUDescriptorHandle(1);
+	//textureSrvHandleGPU = spriteCommon_->GetDirectXCommon()->GetSRVGPUDescriptorHandle(1);
 
 
 	//Sprite
-	vertexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
+	vertexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(VertexData)* modelData.vertices.size()); //4
 
 	//リソースの先頭アドレス
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -21,31 +21,32 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 	//頂点サイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
-
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//モデル
-	vertexData[0].position = { 0.0f,360.0f,0.0f,1.0f };//0
-	vertexData[0].texcoord = { 0.0f,1.0f };
-	vertexData[1].position = { 0.0f,0.0f,0.0f,1.0f };//1,3
-	vertexData[1].texcoord = { 0.0f,0.0f };
-	vertexData[2].position = { 640.0f,360.0f,0.0f,1.0f };//2,5
-	vertexData[2].texcoord = { 1.0f,1.0f };
-	vertexData[3].position = { 640.0f,0.0f,0.0f,1.0f };//4
-	vertexData[3].texcoord = { 1.0f,0.0f };
 
-
+	//左下
+	vertexData[0].position = { 0.0f, 360.0f, 0.0f, 1.0f };
+	vertexData[0].texcoord = { 0.0f, 1.0f };
+	//左上
+	vertexData[1].position = { 0.0f, 0.0f, 0.0f,1.0f };
+	vertexData[1].texcoord = { 0.0f, 0.0f };
+	//右下
+	vertexData[2].position = { 640.0f, 360.0f, 0.0f, 1.0f };
+	vertexData[2].texcoord = { 1.0f, 1.0f };
+	//右上
+	vertexData[3].position = { 640.0f, 0.0f, 0.0f, 1.0f };
+	vertexData[3].texcoord = { 1.0f, 0.0f };
 
 	//Index
-	indexResourceSprite = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
+	indexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
 
 	//リソースの先頭アドレス
-	indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
+	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	//使用するリソースサイズ
-	indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
+	indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
 	//頂点サイズ
-	indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
+	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 
-	indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
+	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
 
 	indexData[0] = 0;
 	indexData[1] = 1;
@@ -57,7 +58,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 
 #pragma region マテリアル
 	//spriteのリソース
-	materialResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(Vector4));
+	materialResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(Material));
 
 	//書き込むためのアドレス
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
@@ -70,9 +71,9 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 
 #pragma region Sprite用のTransformationMatrix
 	//座標変換行列リソースを作る
-	transformationMatrixResourceSprite = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(Matrix4x4));
+	transformationMatrixResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(TransformationMatrix));
 	//書き込むためのアドレスを取得
-	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
+	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
 	//単位行列を書き込んでおく
 	transformationMatrixData->WVP = MakeIdentity4x4();
 	transformationMatrixData->World = MakeIdentity4x4();
@@ -88,14 +89,13 @@ void Sprite::Update()
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
 
-
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 
 	Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 
 	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 
-	Matrix4x4 projectionMatrix = Matrix4x4::MakePerspectiveMatrix(0.45f, (float)WinApp::kClientWidth, (float)WinApp::kClientHeight, 0.0f, 100.0f);
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix((0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.1f, 100.0f)
 
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
@@ -115,9 +115,12 @@ void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 	//マテリアルCBufferの場所を設定
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
+	//TransformationMatrixBufferの場所を設定
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+
 	//wvp用のCBufferの場所を設定 定数バッファビューを0番目のパラメータで設定
 	//spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-	
+
 	//instancing用のDataを読むためにStructuredBufferのSRVを設定する
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
@@ -126,28 +129,15 @@ void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 
 	//spriteの描画。変更が必要なものだけ変更する
 	//spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
-	
+
 	//IndexBufferView 
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferViewSprite);
-	//TransformationMatrixBufferの場所を設定
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
-
-
-
-
-	//spriteの描画。変更が必要なものだけ変更する
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 	//IndexBufferView 
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferViewSprite);
-	//マテリアルCBufferの場所を設定
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-
-	//TransformationMatrixBufferの場所を設定
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	//spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);
 
 
 }

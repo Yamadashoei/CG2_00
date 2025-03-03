@@ -64,10 +64,10 @@ struct ModelData {
 const int32_t kClientWidth = 1280;
 const int32_t kClientHeight = 720;
 
-//Transform transform{ {0.5f,0.5f,0.5f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+Transform transform{ {0.5f,0.5f,0.5f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 ////CPUで動かす用Transformを作る
-//Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-//Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
+Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
 
 //Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 //
@@ -75,7 +75,7 @@ const int32_t kClientHeight = 720;
 //
 //Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 //
-//Matrix4x4 projectionMatrix = Matrix4x4::MakePerspectiveMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+Matrix4x4 projectionMatrix = Matrix4x4::MakePerspectiveMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 //
 //Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 //
@@ -403,6 +403,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
+
+
+
 #pragma endregion
 
 #pragma region 頂点リソース //まだ書いてない
@@ -566,22 +569,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//ImGui 1枚目
 			ImGui::Begin("Model");
-			ImGui::DragFloat3("color", &materialData->x, 0.01f);
+			//ImGui::DragFloat3("color", &materialData->x, 0.01f);
 			ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
 			ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
 			//色変え
-			ImGui::ColorEdit3("color", &materialData->x);
+			//ImGui::ColorEdit3("color", &materialData->x);
 			ImGui::End();
 
 			//ImGui 2枚目
 			ImGui::Begin("Window");
-			ImGui::DragFloat3("spriteColor", &materialData->x, 0.01f);
+			//ImGui::DragFloat3("spriteColor", &materialData->x, 0.01f);
 			ImGui::DragFloat3("spriteScale", &transformSprite.scale.x, 0.01f);
 			ImGui::DragFloat3("spriteRotate", &transformSprite.rotate.x, 0.01f);
 			ImGui::DragFloat3("spriteTranslate", &transformSprite.translate.x, 0.01f);
 			//色変え
-			ImGui::ColorEdit3("spriteColor", &materialData->x);
+			//ImGui::ColorEdit3("spriteColor", &materialData->x);
 			ImGui::End();
 
 			////これから書き込むバックバッファのインデックスを取得
