@@ -12,12 +12,13 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 
 
 	//Sprite
-	vertexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(VertexData)* modelData.vertices.size()); //4
+	vertexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(VertexData) * 4); //modelData.vertices.size()
 
+#pragma region VertexBufferViewを作成
 	//リソースの先頭アドレス
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	//使用するリソースサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 4;
+	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size()); //sizeof(VertexData) * 4;
 	//頂点サイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -35,10 +36,11 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 	//右上
 	vertexData[3].position = { 640.0f, 0.0f, 0.0f, 1.0f };
 	vertexData[3].texcoord = { 1.0f, 0.0f };
+#pragma endregion
 
 	//Index
 	indexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
-
+#pragma region index用
 	//リソースの先頭アドレス
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	//使用するリソースサイズ
@@ -54,11 +56,11 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 	indexData[3] = 1;
 	indexData[4] = 3;
 	indexData[5] = 2;
-
+#pragma endregion
 
 #pragma region マテリアル
 	//spriteのリソース
-	materialResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(Material));
+	materialResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(Material));//Vector4
 
 	//書き込むためのアドレス
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
@@ -71,7 +73,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 
 #pragma region Sprite用のTransformationMatrix
 	//座標変換行列リソースを作る
-	transformationMatrixResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(TransformationMatrix));
+	transformationMatrixResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(TransformationMatrix));//Matrix4x4
 	//書き込むためのアドレスを取得
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
 	//単位行列を書き込んでおく
@@ -95,7 +97,7 @@ void Sprite::Update()
 
 	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 
-	Matrix4x4 projectionMatrix = MakeOrthographicMatrix((0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.1f, 100.0f)
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, (float)WinApp::kClientWidth, (float)WinApp::kClientHeight, 0.0f, 100.0f);
 
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
@@ -131,7 +133,7 @@ void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 	//spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 
 	//IndexBufferView 
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferViewSprite);
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);//indexBufferViewSprite
 
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 

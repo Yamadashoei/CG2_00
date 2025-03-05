@@ -149,7 +149,7 @@ ComPtr <ID3D12Resource>  DirectXCommon::CreateBufferResource(size_t sizeInBytes)
 	return resource;
 }
 
-ComPtr<ID3D12Resource>  DirectXCommon::CreateTextureResource(ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata)
+ComPtr<ID3D12Resource>  DirectXCommon::CreateTextureResource(const DirectX::TexMetadata& metadata)//ComPtr<ID3D12Device> device, 
 {
 	//metadataを基にResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
